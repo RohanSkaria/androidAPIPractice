@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/apiLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".ApiActivity">
+
+    <!-- Spinner to select which API call to make -->
+    <Spinner
+        android:id="@+id/spinnerApiSource"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <!-- Animated loading text (instead of a static progress bar) -->
+    <TextView
+        android:id="@+id/tvLoading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Loading"
+        android:textSize="16sp"
+        android:visibility="gone"
+        android:layout_marginTop="8dp" />
+
+    <!-- Button to fetch data from selected API -->
+    <Button
+        android:id="@+id/btnFetch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Fetch Crypto Data"
+        android:layout_marginTop="8dp" />
+
+    <!-- RecyclerView to display fetched coins -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewCoins"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="16dp"/>
+
+</LinearLayout>
