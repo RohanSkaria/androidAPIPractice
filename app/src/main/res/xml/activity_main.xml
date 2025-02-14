@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    tools:context=".MainActivity">
+
+    <!-- Group Name -->
+    <TextView
+        android:id="@+id/tvGroupName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="best group"
+        android:textSize="24sp"
+        android:layout_marginBottom="32dp" />
+
+    <!-- Button to go to API screen -->
+    <Button
+        android:id="@+id/buttonApi"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Go to API Screen" />
+
+    <!-- Button to go to Firebase screen -->
+    <Button
+        android:id="@+id/buttonFirebase"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Go to Firebase Screen"
+        android:layout_marginTop="16dp" />
+
+</LinearLayout>
