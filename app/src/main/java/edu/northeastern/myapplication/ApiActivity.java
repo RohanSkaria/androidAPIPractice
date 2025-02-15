@@ -3,6 +3,8 @@ package edu.northeastern.myapplication;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -219,7 +221,7 @@ public class ApiActivity extends AppCompatActivity {
 
                 try {
                     JSONArray arr = new JSONArray(response);
-                    int limit = Math.min(arr.length(), 5);
+                    int limit = Math.min(arr.length(), 20);
                     for (int i = 0; i < limit; i++) {
                         JSONObject coinObj = arr.getJSONObject(i);
 
@@ -382,8 +384,17 @@ public class ApiActivity extends AppCompatActivity {
             @Override
             public void run() {
                 adapter.notifyDataSetChanged();
+                adjustRecyclerViewHeight();
             }
         });
+    }
+
+    private void adjustRecyclerViewHeight() {
+        ConstraintLayout constraintLayout = findViewById(R.id.apiLayout);
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone(constraintLayout);
+        constraintSet.constrainHeight(R.id.recyclerViewCoins, ConstraintSet.MATCH_CONSTRAINT);
+        constraintSet.applyTo(constraintLayout);
     }
 
     private void stopLoadingOnUI() {
