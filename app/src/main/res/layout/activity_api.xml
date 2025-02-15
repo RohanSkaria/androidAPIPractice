@@ -33,6 +33,30 @@
         android:text="Fetch Crypto Data"
         android:layout_marginTop="8dp" />
 
+    <!--
+         ADDED FOR DYNAMIC INPUT (Hello, dynamic layouts!)
+         This container will hold multiple EditTexts, one for each user-specified coin ID.
+    -->
+    <LinearLayout
+        android:id="@+id/dynamicInputContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="8dp"
+        android:visibility="gone" />
+
+    <!--
+         Button to add new EditText fields for coin IDs. Only visible if
+         the user selects the new spinner option ("CoinGecko: user-specified IDs").
+    -->
+    <Button
+        android:id="@+id/btnAddId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add Coin ID"
+        android:layout_marginTop="8dp"
+        android:visibility="gone" />
+
     <!-- RecyclerView to display fetched coins -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewCoins"

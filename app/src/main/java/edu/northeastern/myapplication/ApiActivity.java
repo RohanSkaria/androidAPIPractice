@@ -7,17 +7,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.InputType;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import com.google.android.material.snackbar.Snackbar;
-
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -56,89 +49,9 @@ public class ApiActivity extends AppCompatActivity {
     private Handler loadingHandler = new Handler();
     private boolean isLoadingAnimationActive = false;
     private int loadingDotCount = 0;
-    private LinearLayout dynamicInputContainer;
-    private Button btnAddInput;
-    private ArrayList<View> dynamicInputs = new ArrayList<>();
-    private int inputCounter = 0;
 
     private static final String KEY_COIN_LIST = "KEY_COIN_LIST";
 
-    private void setupDynamicInputs() {
-        dynamicInputContainer = findViewById(R.id.dynamicInputContainer);
-        btnAddInput = findViewById(R.id.btnAddInput);
-
-        btnAddInput.setOnClickListener(v -> {
-            addNewFilterInput();
-        });
-    }
-    private void addNewFilterInput() {
-        inputCounter++;
-
-        LinearLayout inputGroup = new LinearLayout(this);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-        params.setMargins(0, 8, 0, 8);
-        inputGroup.setLayoutParams(params);
-        inputGroup.setOrientation(LinearLayout.HORIZONTAL);
-
-        Spinner filterTypeSpinner = new Spinner(this);
-        filterTypeSpinner.setLayoutParams(new LinearLayout.LayoutParams(
-                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
-        ArrayAdapter<String> filterAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item,
-                new String[]{"Price Above", "Price Below", "Market Cap", "Volume"});
-        filterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        filterTypeSpinner.setAdapter(filterAdapter);
-
-        inputGroup.addView(filterTypeSpinner);
-        dynamicInputContainer.addView(inputGroup);
-        View valueInput = createValueInput(filterTypeSpinner.getSelectedItemPosition());
-
-        Button removeButton = new Button(this);
-        removeButton.setText("✕");
-        removeButton.setOnClickListener(v -> {
-            dynamicInputContainer.removeView(inputGroup);
-            dynamicInputs.remove(valueInput);
-        });
-
-        inputGroup.addView(valueInput);
-        inputGroup.addView(removeButton);
-        dynamicInputs.add(valueInput);
-    }
-
-    private View createValueInput(int filterType) {
-        switch (filterType % 3) {
-            case 0:
-                EditText editText = new EditText(this);
-                editText.setLayoutParams(new LinearLayout.LayoutParams(
-                        0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
-                editText.setInputType(InputType.TYPE_CLASS_NUMBER |
-                        InputType.TYPE_NUMBER_FLAG_DECIMAL);
-                editText.setHint("Enter value");
-                return editText;
-            case 1:
-                SeekBar seekBar = new SeekBar(this);
-                seekBar.setLayoutParams(new LinearLayout.LayoutParams(
-                        0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
-                seekBar.setMax(100);
-                return seekBar;
-            default:
-                RadioGroup radioGroup = new RadioGroup(this);
-                radioGroup.setLayoutParams(new LinearLayout.LayoutParams(
-                        0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
-                radioGroup.setOrientation(LinearLayout.HORIZONTAL);
-
-                RadioButton rbHigh = new RadioButton(this);
-                rbHigh.setText("High");
-                RadioButton rbLow = new RadioButton(this);
-                rbLow.setText("Low");
-
-                radioGroup.addView(rbHigh);
-                radioGroup.addView(rbLow);
-                return radioGroup;
-        }
-    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -148,8 +61,6 @@ public class ApiActivity extends AppCompatActivity {
         tvLoading = findViewById(R.id.tvLoading);
         btnFetch = findViewById(R.id.btnFetch);
         recyclerView = findViewById(R.id.recyclerViewCoins);
-
-        setupDynamicInputs();
 
         // Setup spinner with 3 options
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
