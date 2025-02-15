@@ -72,13 +72,13 @@ We fetch cryptocurrency data (name, symbol, price, icon) from multiple APIs (Coi
 
 ## Contributors
 
-| Name         | Contributions                                                                       |
-|--------------|-------------------------------------------------------------------------------------|
-| **Willem**   | @willem | Created the base project, ensured it met initial requirements, and completed the first two challenge items. |
-| **Madisnen** | Implemented challenge #3, major UI overhaul/improvements.       |
-| **Rohan**    | Implemented challenge #4, handled UI issues in portrait/landscape orientation.           |
-| **Parwaz**   | Implemented challenge #5, ensured no usage of deprecated AsyncTask.                      |
-| **Yunmu**    | Enhanced UI in constraint layout and assisted in all challenge tasks.                    |
+| Name        | Contributions                                                                                    |
+|-------------|--------------------------------------------------------------------------------------------------|
+| **Willem**  | Created the base project with initial requirements, and completed the first two challenge items. |
+| **Madisen** | Implemented challenge #3, major UI overhaul/improvements.                                        |
+| **Rohan**   | Implemented challenge #4, handled UI issues in portrait/landscape orientation.                   |
+| **Parwaz**  | Implemented challenge #5, ensured no usage of deprecated AsyncTask.                              |
+| **Yunmu**   | Enhanced UI in constraint layout and assisted in all challenge tasks.                            |
 
 ---
 

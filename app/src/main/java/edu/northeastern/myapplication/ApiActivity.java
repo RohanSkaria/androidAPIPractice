@@ -256,8 +256,10 @@ public class ApiActivity extends AppCompatActivity {
         coinList.clear();
         adapter.notifyDataSetChanged();
 
-        // We'll fetch 200 coins, then pick the bottom 3 (lowest volumeUsd24Hr).
+
+        // fetch 200 coins, then pick the bottom 3 (lowest volumeUsd24Hr).
         final String url = "https://api.coincap.io/v2/assets?limit=200";
+
 
         new Thread(new Runnable() {
             @Override
@@ -269,16 +271,20 @@ public class ApiActivity extends AppCompatActivity {
                     return;
                 }
 
+
                 try {
                     JSONObject rootObj = new JSONObject(response);
                     JSONArray dataArr = rootObj.getJSONArray("data");
 
+
                     // Temporary list to hold raw JSON objects
                     ArrayList<JSONObject> rawList = new ArrayList<>();
+
 
                     for (int i = 0; i < dataArr.length(); i++) {
                         rawList.add(dataArr.getJSONObject(i));
                     }
+
 
                     // Sort rawList by volumeUsd24Hr ascending
                     Collections.sort(rawList, new Comparator<JSONObject>() {
@@ -296,24 +302,30 @@ public class ApiActivity extends AppCompatActivity {
                         }
                     });
 
+
                     // Now take the first 3 from sorted list (lowest volume)
                     int limit = Math.min(3, rawList.size());
                     for (int i = 0; i < limit; i++) {
                         JSONObject coinObj = rawList.get(i);
 
+
                         String name = coinObj.getString("name");
                         String symbol = coinObj.getString("symbol");
                         double priceUsd = Double.parseDouble(coinObj.optString("priceUsd", "0"));
+
 
                         // Build the coin's icon URL
                         String logoUrl = "https://assets.coincap.io/assets/icons/"
                                 + symbol.toLowerCase() + "@2x.png";
 
+
                         CryptoCoin coin = new CryptoCoin(name, symbol, priceUsd, logoUrl);
                         coinList.add(coin);
                     }
 
+
                     updateRecycler();
+
 
                 } catch (JSONException e) {
                     showError("JSON parse error (CoinCap): " + e.getMessage());
@@ -322,6 +334,7 @@ public class ApiActivity extends AppCompatActivity {
             }
         }).start();
     }
+
 
     // --------------------------------------------------------------------------------------
     // Helper: doHttpGet (blocking IO, so must be called on background thread!)
