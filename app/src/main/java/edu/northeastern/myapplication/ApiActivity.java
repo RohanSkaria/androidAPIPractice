@@ -30,7 +30,7 @@ import java.util.Comparator;
 /**
  * Demonstration:
  *  - (Spinner Option 1) fetchCoinGeckoBitcoin() [unchanged, single call for BTC]
- *  - (Spinner Option 2) fetchCoinPaprikaTop5()  (Top 5 coins)
+ *  - (Spinner Option 2) fetchCoinPaprikaTop10() (Top 10 coins)
  *  - (Spinner Option 3) fetchCoinCapWorst3()    (Lowest 3 by volume)
  *
  *  Now also supports saving 'notes' with timestamps in JSON.
@@ -61,11 +61,11 @@ public class ApiActivity extends AppCompatActivity {
         btnFetch = findViewById(R.id.btnFetch);
         recyclerView = findViewById(R.id.recyclerViewCoins);
 
-        // Setup spinner with 3 options
+        // Setup spinner with 3 options (UPDATED: #2 is now "Top 10")
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_spinner_item,
-                new String[]{"CoinGecko: Bitcoin only", "CoinPaprika: Top 5", "CoinCap: Worst 3"}
+                new String[]{"CoinGecko: Bitcoin only", "CoinPaprika: Top 10", "CoinCap: Worst 3"}
         );
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerApiSource.setAdapter(spinnerAdapter);
@@ -96,7 +96,8 @@ public class ApiActivity extends AppCompatActivity {
                         fetchCoinGeckoBitcoin();
                         break;
                     case 1:
-                        fetchCoinPaprikaTop5();
+                        // Updated: Now top 10
+                        fetchCoinPaprikaTop10();
                         break;
                     case 2:
                         fetchCoinCapWorst3();
@@ -141,7 +142,7 @@ public class ApiActivity extends AppCompatActivity {
     };
 
     // --------------------------------------------------------------------------------------
-    // Networking: fetchCoinGeckoBitcoin, fetchCoinPaprikaTop5, fetchCoinCapWorst3
+    // Networking: fetchCoinGeckoBitcoin, fetchCoinPaprikaTop10, fetchCoinCapWorst3
     // --------------------------------------------------------------------------------------
 
     private void fetchCoinGeckoBitcoin() {
@@ -189,7 +190,8 @@ public class ApiActivity extends AppCompatActivity {
         }).start();
     }
 
-    private void fetchCoinPaprikaTop5() {
+    // Updated method name + logic
+    private void fetchCoinPaprikaTop10() {
         startLoadingAnimation();
         coinList.clear();
         adapter.notifyDataSetChanged();
@@ -208,7 +210,8 @@ public class ApiActivity extends AppCompatActivity {
 
                 try {
                     JSONArray arr = new JSONArray(response);
-                    int limit = Math.min(arr.length(), 5);
+                    // Grab the top 10 instead of 5
+                    int limit = Math.min(arr.length(), 10);
                     for (int i = 0; i < limit; i++) {
                         JSONObject coinObj = arr.getJSONObject(i);
 
