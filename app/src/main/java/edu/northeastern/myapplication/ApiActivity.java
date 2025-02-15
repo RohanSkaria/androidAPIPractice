@@ -58,6 +58,15 @@ public class ApiActivity extends AppCompatActivity {
 
     private static final String KEY_COIN_LIST = "KEY_COIN_LIST";
 
+    private void setupDynamicInputs() {
+        dynamicInputContainer = findViewById(R.id.dynamicInputContainer);
+        btnAddInput = findViewById(R.id.btnAddInput);
+
+        btnAddInput.setOnClickListener(v -> {
+            // TODO: Implement filter input addition
+        });
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
