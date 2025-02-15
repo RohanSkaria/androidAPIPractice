@@ -7,12 +7,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.InputType;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import com.google.android.material.snackbar.Snackbar;
 
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -90,6 +95,38 @@ public class ApiActivity extends AppCompatActivity {
         dynamicInputContainer.addView(inputGroup);
     }
 
+    private View createValueInput(int filterType) {
+        switch (filterType % 3) {
+            case 0:
+                EditText editText = new EditText(this);
+                editText.setLayoutParams(new LinearLayout.LayoutParams(
+                        0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+                editText.setInputType(InputType.TYPE_CLASS_NUMBER |
+                        InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                editText.setHint("Enter value");
+                return editText;
+            case 1:
+                SeekBar seekBar = new SeekBar(this);
+                seekBar.setLayoutParams(new LinearLayout.LayoutParams(
+                        0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+                seekBar.setMax(100);
+                return seekBar;
+            default:
+                RadioGroup radioGroup = new RadioGroup(this);
+                radioGroup.setLayoutParams(new LinearLayout.LayoutParams(
+                        0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+                radioGroup.setOrientation(LinearLayout.HORIZONTAL);
+
+                RadioButton rbHigh = new RadioButton(this);
+                rbHigh.setText("High");
+                RadioButton rbLow = new RadioButton(this);
+                rbLow.setText("Low");
+
+                radioGroup.addView(rbHigh);
+                radioGroup.addView(rbLow);
+                return radioGroup;
+        }
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
