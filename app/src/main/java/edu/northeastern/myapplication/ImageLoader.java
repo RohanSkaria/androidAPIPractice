@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log; // <-- Import the Android Log class
+import android.util.Log;
 import android.widget.ImageView;
 
 import java.io.InputStream;
@@ -14,9 +14,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ImageLoader {
-    private static final String TAG = "ImageLoader"; // We'll use this tag for logging
+    private static final String TAG = "ImageLoader";
 
-    // Simple in-memory cache to avoid re-downloading the same images repeatedly
+
     private static Map<String, Bitmap> bitmapCache = new HashMap<>();
 
     public static void loadImageAsync(final String imageUrl, final ImageView imageView) {
