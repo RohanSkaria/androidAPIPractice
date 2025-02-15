@@ -66,6 +66,29 @@ public class ApiActivity extends AppCompatActivity {
             // TODO: Implement filter input addition
         });
     }
+    private void addNewFilterInput() {
+        inputCounter++;
+
+        LinearLayout inputGroup = new LinearLayout(this);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.setMargins(0, 8, 0, 8);
+        inputGroup.setLayoutParams(params);
+        inputGroup.setOrientation(LinearLayout.HORIZONTAL);
+
+        Spinner filterTypeSpinner = new Spinner(this);
+        filterTypeSpinner.setLayoutParams(new LinearLayout.LayoutParams(
+                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+        ArrayAdapter<String> filterAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item,
+                new String[]{"Price Above", "Price Below", "Market Cap", "Volume"});
+        filterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        filterTypeSpinner.setAdapter(filterAdapter);
+
+        inputGroup.addView(filterTypeSpinner);
+        dynamicInputContainer.addView(inputGroup);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
