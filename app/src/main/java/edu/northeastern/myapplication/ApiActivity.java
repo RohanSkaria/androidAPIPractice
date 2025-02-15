@@ -1,9 +1,10 @@
 package edu.northeastern.myapplication;
 
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -23,19 +24,19 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Demonstration:
  *  - (Spinner Option 1)  fetchCoinGeckoBitcoin() [unchanged, single call for BTC]
- *  - (Spinner Option 2)  fetchCoinPaprikaTop5()  fetch top 5 from CoinPaprika, then for each coin, call CoinGecko for logo
- *  - (Spinner Option 3)  fetchCoinCapTop5()      fetch top 5 from CoinCap, then for each coin, call CoinGecko for logo
+ *  - (Spinner Option 2)  fetchCoinPaprikaTop5()  fetch top 5 from CoinPaprika
+ *  - (Spinner Option 3)  fetchCoinCapWorst3()    fetch 200 coins from CoinCap locally,
+ *                                                sort by volumeUsd24Hr ascending,
+ *                                                then take the bottom 3 for display.
  *
- *  We do a second, smaller "single-coin" call to CoinGecko for each coin symbol, using a
- *  basic map from symbol -> coingeckoId -> coinGeckoLogoURL.
+ *  No other code has been omitted or changed except for the method that handles "worst 3."
  */
-
-
-
 
 public class ApiActivity extends AppCompatActivity {
 
@@ -66,7 +67,7 @@ public class ApiActivity extends AppCompatActivity {
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_spinner_item,
-                new String[]{"CoinGecko: Bitcoin only", "CoinPaprika: Top 5", "CoinCap: Top 5"}
+                new String[]{"CoinGecko: Bitcoin only", "CoinPaprika: Top 5", "CoinCap: Worst 3"}
         );
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerApiSource.setAdapter(spinnerAdapter);
@@ -102,8 +103,8 @@ public class ApiActivity extends AppCompatActivity {
                         fetchCoinPaprikaTop5();
                         break;
                     case 2:
-                        // CoinCap - Top 5
-                        fetchCoinCapTop5();
+                        // CoinCap - "worst 3" by local sort of volumeUsd24Hr
+                        fetchCoinCapWorst3();
                         break;
                 }
             }
@@ -145,7 +146,7 @@ public class ApiActivity extends AppCompatActivity {
     };
 
     // --------------------------------------------------------------------------------------
-    // Networking: fetchCoinGeckoBitcoin, fetchCoinPaprikaTop5, fetchCoinCapTop5
+    // Networking: fetchCoinGeckoBitcoin, fetchCoinPaprikaTop5, fetchCoinCapWorst3
     // --------------------------------------------------------------------------------------
 
     /**
@@ -181,7 +182,7 @@ public class ApiActivity extends AppCompatActivity {
                     JSONObject currentPrice = marketData.getJSONObject("current_price");
                     double priceUsd = currentPrice.getDouble("usd");
 
-                    // Keep using CoinPaprika's own CDN for the logo
+                    // Keep using CoinPaprika's or CoinCap's CDN for the logo
                     String logoUrl = "https://assets.coincap.io/assets/icons/"
                             + symbol.toLowerCase() + "@2x.png";
 
@@ -199,7 +200,7 @@ public class ApiActivity extends AppCompatActivity {
 
     /**
      * Fetch top 5 from CoinPaprika, use the Paprika data for name/symbol/price,
-     * and still rely on Paprika's own CDN for the logo (like before).
+     * and still rely on that pattern for the logo.
      */
     private void fetchCoinPaprikaTop5() {
         startLoadingAnimation();
@@ -231,7 +232,7 @@ public class ApiActivity extends AppCompatActivity {
                         JSONObject usdObj = quotes.getJSONObject("USD");
                         double priceUsd = usdObj.getDouble("price");
 
-                        // Keep using CoinPaprika's own CDN for the logo
+                        // Using CoinCap's icons:
                         String logoUrl = "https://assets.coincap.io/assets/icons/"
                                 + symbol.toLowerCase() + "@2x.png";
 
@@ -249,16 +250,18 @@ public class ApiActivity extends AppCompatActivity {
     }
 
     /**
-     * Fetch top 5 from CoinCap, and for the logos we now use the CoinCap icons CDN:
-     * https://assets.coincap.io/assets/icons/<symbol>@2x.png
+     * Fetch 200 coins from CoinCap, store them in a temporary list,
+     * sort them locally by volumeUsd24Hr ascending, then take the first 3.
      */
-    private void fetchCoinCapTop5() {
+    private void fetchCoinCapWorst3() {
         startLoadingAnimation();
         coinList.clear();
         adapter.notifyDataSetChanged();
 
-        // Endpoint: https://api.coincap.io/v2/assets?limit=5
-        final String url = "https://api.coincap.io/v2/assets?limit=5";
+
+        // fetch 200 coins, then pick the bottom 3 (lowest volumeUsd24Hr).
+        final String url = "https://api.coincap.io/v2/assets?limit=200";
+
 
         new Thread(new Runnable() {
             @Override
@@ -270,24 +273,61 @@ public class ApiActivity extends AppCompatActivity {
                     return;
                 }
 
+
                 try {
                     JSONObject rootObj = new JSONObject(response);
                     JSONArray dataArr = rootObj.getJSONArray("data");
+
+
+                    // Temporary list to hold raw JSON objects
+                    ArrayList<JSONObject> rawList = new ArrayList<>();
+
+
                     for (int i = 0; i < dataArr.length(); i++) {
-                        JSONObject coinObj = dataArr.getJSONObject(i);
+                        rawList.add(dataArr.getJSONObject(i));
+                    }
+
+
+                    // Sort rawList by volumeUsd24Hr ascending
+                    Collections.sort(rawList, new Comparator<JSONObject>() {
+                        @Override
+                        public int compare(JSONObject o1, JSONObject o2) {
+                            double v1 = 0.0;
+                            double v2 = 0.0;
+                            try {
+                                v1 = Double.parseDouble(o1.optString("volumeUsd24Hr", "0"));
+                                v2 = Double.parseDouble(o2.optString("volumeUsd24Hr", "0"));
+                            } catch (NumberFormatException e) {
+                                e.printStackTrace();
+                            }
+                            return Double.compare(v1, v2);
+                        }
+                    });
+
+
+                    // Now take the first 3 from sorted list (lowest volume)
+                    int limit = Math.min(3, rawList.size());
+                    for (int i = 0; i < limit; i++) {
+                        JSONObject coinObj = rawList.get(i);
+
+
                         String name = coinObj.getString("name");
                         String symbol = coinObj.getString("symbol");
-                        double priceUsd = coinObj.getDouble("priceUsd");
+                        double priceUsd = Double.parseDouble(coinObj.optString("priceUsd", "0"));
 
-                        //  Build the coin's icon URL using CoinCap's pattern:
-                        //  https://assets.coincap.io/assets/icons/<symbol_lowercase>@2x.png
+
+                        // Build the coin's icon URL
                         String logoUrl = "https://assets.coincap.io/assets/icons/"
                                 + symbol.toLowerCase() + "@2x.png";
+
 
                         CryptoCoin coin = new CryptoCoin(name, symbol, priceUsd, logoUrl);
                         coinList.add(coin);
                     }
+
+
                     updateRecycler();
+
 
                 } catch (JSONException e) {
                     showError("JSON parse error (CoinCap): " + e.getMessage());
@@ -296,6 +336,7 @@ public class ApiActivity extends AppCompatActivity {
             }
         }).start();
     }
+
 
     // --------------------------------------------------------------------------------------
     // Helper: doHttpGet (blocking IO, so must be called on background thread!)
@@ -320,7 +361,7 @@ public class ApiActivity extends AppCompatActivity {
                 }
                 return sb.toString();
             } else {
-                return null; // or handle the code differently
+                return null; // or handle differently
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -343,8 +384,17 @@ public class ApiActivity extends AppCompatActivity {
             @Override
             public void run() {
                 adapter.notifyDataSetChanged();
+                adjustRecyclerViewHeight();
             }
         });
+    }
+
+    private void adjustRecyclerViewHeight() {
+        ConstraintLayout constraintLayout = findViewById(R.id.apiLayout);
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone(constraintLayout);
+        constraintSet.constrainHeight(R.id.recyclerViewCoins, ConstraintSet.MATCH_CONSTRAINT);
+        constraintSet.applyTo(constraintLayout);
     }
 
     private void stopLoadingOnUI() {

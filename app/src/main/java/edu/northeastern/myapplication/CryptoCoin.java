@@ -24,4 +24,3 @@ public class CryptoCoin {
     public void setLogoUrl(String logoUrl) { this.logoUrl = logoUrl; }
 }
 
-
