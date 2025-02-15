@@ -1,55 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/layoutItemCoin"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="vertical"
     android:padding="8dp">
-    <!-- Logo -->
-    <ImageView
-        android:id="@+id/imageViewLogo"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:scaleType="centerCrop"
-        android:padding="4dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
 
-    <!-- Coin Name -->
-    <TextView
-        android:id="@+id/tvCoinName"
-        android:layout_width="0dp"
+    <!-- Horizontal row: logo + name/price fields -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:textSize="16sp"
-        android:ellipsize="none"
-        android:lines="1"
-        android:paddingEnd="8dp"
-        app:layout_constraintStart_toEndOf="@id/imageViewLogo"
-        app:layout_constraintTop_toTopOf="@id/imageViewLogo"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:orientation="horizontal">
 
-    <!-- Coin Symbol -->
-    <TextView
-        android:id="@+id/tvCoinSymbol"
-        android:layout_width="0dp"
+        <!-- Logo -->
+        <ImageView
+            android:id="@+id/imageViewLogo"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:scaleType="centerCrop"
+            android:padding="4dp" />
+
+        <!-- Vertical container for name, symbol, price -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvCoinName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tvCoinSymbol"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tvCoinPrice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- An EditText to type a custom note -->
+    <EditText
+        android:id="@+id/editNoteInput"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="14sp"
-        app:layout_constraintStart_toStartOf="@id/tvCoinName"
-        app:layout_constraintTop_toBottomOf="@id/tvCoinName"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:hint="Type a note..."
+        android:layout_marginTop="8dp" />
 
-    <!-- Coin Price -->
-    <TextView
-        android:id="@+id/tvCoinPrice"
-        android:layout_width="0dp"
+    <!-- Button to add the typed note -->
+    <Button
+        android:id="@+id/btnAddNote"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="14sp"
-        app:layout_constraintStart_toStartOf="@id/tvCoinName"
-        app:layout_constraintTop_toBottomOf="@id/tvCoinSymbol"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        android:text="Add Note"
+        android:layout_marginTop="8dp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Container for multiple notes (dynamic) -->
+    <LinearLayout
+        android:id="@+id/layoutNotes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="8dp" />
+
+</LinearLayout>
