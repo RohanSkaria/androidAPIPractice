@@ -93,6 +93,18 @@ public class ApiActivity extends AppCompatActivity {
 
         inputGroup.addView(filterTypeSpinner);
         dynamicInputContainer.addView(inputGroup);
+        View valueInput = createValueInput(filterTypeSpinner.getSelectedItemPosition());
+
+        Button removeButton = new Button(this);
+        removeButton.setText("✕");
+        removeButton.setOnClickListener(v -> {
+            dynamicInputContainer.removeView(inputGroup);
+            dynamicInputs.remove(valueInput);
+        });
+
+        inputGroup.addView(valueInput);
+        inputGroup.addView(removeButton);
+        dynamicInputs.add(valueInput);
     }
 
     private View createValueInput(int filterType) {
