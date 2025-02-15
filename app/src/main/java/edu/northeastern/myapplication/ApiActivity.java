@@ -221,7 +221,7 @@ public class ApiActivity extends AppCompatActivity {
 
                 try {
                     JSONArray arr = new JSONArray(response);
-                    int limit = Math.min(arr.length(), 20);
+                    int limit = Math.min(arr.length(), 5);
                     for (int i = 0; i < limit; i++) {
                         JSONObject coinObj = arr.getJSONObject(i);
 
