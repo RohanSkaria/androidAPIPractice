@@ -68,7 +68,7 @@ public class ApiActivity extends AppCompatActivity {
         btnAddInput = findViewById(R.id.btnAddInput);
 
         btnAddInput.setOnClickListener(v -> {
-            // TODO: Implement filter input addition
+            addNewFilterInput();
         });
     }
     private void addNewFilterInput() {
@@ -148,6 +148,8 @@ public class ApiActivity extends AppCompatActivity {
         tvLoading = findViewById(R.id.tvLoading);
         btnFetch = findViewById(R.id.btnFetch);
         recyclerView = findViewById(R.id.recyclerViewCoins);
+
+        setupDynamicInputs();
 
         // Setup spinner with 3 options
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
