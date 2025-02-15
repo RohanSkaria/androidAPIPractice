@@ -11,6 +11,8 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import com.google.android.material.snackbar.Snackbar;
+
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -49,6 +51,10 @@ public class ApiActivity extends AppCompatActivity {
     private Handler loadingHandler = new Handler();
     private boolean isLoadingAnimationActive = false;
     private int loadingDotCount = 0;
+    private LinearLayout dynamicInputContainer;
+    private Button btnAddInput;
+    private ArrayList<View> dynamicInputs = new ArrayList<>();
+    private int inputCounter = 0;
 
     private static final String KEY_COIN_LIST = "KEY_COIN_LIST";
 
