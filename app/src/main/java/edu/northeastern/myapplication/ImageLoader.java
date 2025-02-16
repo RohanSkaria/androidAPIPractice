@@ -14,20 +14,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ImageLoader {
-    private static final String TAG = "ImageLoader"; // We'll use this tag for logging
+    private static final String TAG = "ImageLoader";
 
-    // Simple in-memory cache to avoid re-downloading the same images repeatedly
     private static Map<String, Bitmap> bitmapCache = new HashMap<>();
 
     public static void loadImageAsync(final String imageUrl, final ImageView imageView) {
-        // If already cached, set it immediately
         if (bitmapCache.containsKey(imageUrl)) {
             Log.d(TAG, "Image is already in cache: " + imageUrl);
             imageView.setImageBitmap(bitmapCache.get(imageUrl));
             return;
         }
 
-        // Otherwise, fetch on a separate thread
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -44,7 +41,6 @@ public class ImageLoader {
                     int responseCode = connection.getResponseCode();
                     Log.d(TAG, "Response code for " + imageUrl + ": " + responseCode);
 
-                    // Get content type to see if it's actually an image (optional)
                     String contentType = connection.getContentType();
                     Log.d(TAG, "Content-Type for " + imageUrl + ": " + contentType);
 
@@ -65,7 +61,6 @@ public class ImageLoader {
                             }
                         });
                     } else {
-                        // If the response code is not 200, log it as an error
                         Log.e(TAG, "Failed to download image from: " + imageUrl
                                 + " | Response code: " + responseCode);
                     }
