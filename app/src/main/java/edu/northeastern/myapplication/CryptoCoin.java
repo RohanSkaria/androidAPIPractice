@@ -9,7 +9,7 @@ public class CryptoCoin {
     private double priceUsd;
     private String logoUrl; // URL to the coin's logo
 
-    // Store each note (including timestamp) as a simple string
+
     private List<String> notes;
 
     public CryptoCoin(String name, String symbol, double priceUsd, String logoUrl) {
