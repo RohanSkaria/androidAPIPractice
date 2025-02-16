@@ -40,7 +40,6 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/fetch_crypto_data"
-        android:backgroundTint="#6200EE"
         android:textColor="@android:color/white"
         android:elevation="6dp"
         app:layout_constraintStart_toStartOf="parent"
