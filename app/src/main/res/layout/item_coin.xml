@@ -7,7 +7,7 @@
     android:layout_height="wrap_content"
     android:padding="8dp">
 
-    <!-- Top container for coin info -->
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topContainer"
         android:layout_width="0dp"
@@ -16,7 +16,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Logo -->
+
         <ImageView
             android:id="@+id/imageViewLogo"
             android:layout_width="48dp"
@@ -27,7 +27,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- Coin Name -->
+
         <TextView
             android:id="@+id/tvCoinName"
             android:layout_width="0dp"
@@ -40,7 +40,7 @@
             app:layout_constraintTop_toTopOf="@id/imageViewLogo"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Coin Symbol -->
+
         <TextView
             android:id="@+id/tvCoinSymbol"
             android:layout_width="0dp"
@@ -51,7 +51,7 @@
             app:layout_constraintTop_toBottomOf="@id/tvCoinName"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Coin Price -->
+
         <TextView
             android:id="@+id/tvCoinPrice"
             android:layout_width="0dp"
@@ -64,7 +64,7 @@
             app:layout_constraintBottom_toBottomOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- EditText for note input -->
+
     <EditText
         android:id="@+id/editNoteInput"
         android:layout_width="0dp"
@@ -75,7 +75,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Button to add the note -->
+
     <Button
         android:id="@+id/btnAddNote"
         android:layout_width="wrap_content"
@@ -85,7 +85,7 @@
         app:layout_constraintTop_toBottomOf="@id/editNoteInput"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <!-- Container for dynamic notes -->
+
     <LinearLayout
         android:id="@+id/layoutNotes"
         android:layout_width="0dp"

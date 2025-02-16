@@ -9,7 +9,7 @@
     android:padding="16dp"
     tools:context=".MainActivity">
 
-    <!-- Group Name -->
+
     <TextView
         android:id="@+id/tvGroupName"
         android:layout_width="wrap_content"
@@ -24,7 +24,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Button to go to API screen -->
+
     <Button
         android:id="@+id/buttonApi"
         android:layout_width="0dp"
@@ -38,7 +38,7 @@
         android:layout_marginTop="24dp"
         android:padding="12dp" />
 
-    <!-- Button to go to Firebase screen -->
+
     <Button
         android:id="@+id/buttonFirebase"
         android:layout_width="0dp"
