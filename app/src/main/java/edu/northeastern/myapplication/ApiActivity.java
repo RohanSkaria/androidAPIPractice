@@ -11,7 +11,9 @@ import android.os.Handler;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+
 import com.google.android.material.snackbar.Snackbar;
+
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -29,11 +31,11 @@ import java.util.Comparator;
 
 /**
  * Demonstration:
- *  - (Spinner Option 1) fetchCoinGeckoBitcoin() [unchanged, single call for BTC]
- *  - (Spinner Option 2) fetchCoinPaprikaTop10() (Top 10 coins)
- *  - (Spinner Option 3) fetchCoinCapWorst3()    (Lowest 3 by volume)
- *
- *  Now also supports saving 'notes' with timestamps in JSON.
+ * - (Spinner Option 1) fetchCoinGeckoBitcoin() [unchanged, single call for BTC]
+ * - (Spinner Option 2) fetchCoinPaprikaTop10() (Top 10 coins)
+ * - (Spinner Option 3) fetchCoinCapWorst3()    (Lowest 3 by volume)
+ * <p>
+ * Now also supports saving 'notes' with timestamps in JSON.
  */
 
 public class ApiActivity extends AppCompatActivity {
@@ -338,7 +340,10 @@ public class ApiActivity extends AppCompatActivity {
             return null;
         } finally {
             if (reader != null) {
-                try { reader.close(); } catch (Exception ignored) {}
+                try {
+                    reader.close();
+                } catch (Exception ignored) {
+                }
             }
             if (connection != null) {
                 connection.disconnect();
@@ -359,11 +364,16 @@ public class ApiActivity extends AppCompatActivity {
         });
     }
 
+    private static final int COIN_COUNT_THRESHOLD = 10;
+    private static final int RECYCLER_FIXED_HEIGHT_DP = 750;
     private void adjustRecyclerViewHeight() {
         ConstraintLayout constraintLayout = findViewById(R.id.apiLayout);
         ConstraintSet constraintSet = new ConstraintSet();
         constraintSet.clone(constraintLayout);
-        constraintSet.constrainHeight(R.id.recyclerViewCoins, ConstraintSet.MATCH_CONSTRAINT);
+        if (coinList.size() >= COIN_COUNT_THRESHOLD) {
+            int fixedHeightPx = (int) (RECYCLER_FIXED_HEIGHT_DP * getResources().getDisplayMetrics().density);
+            constraintSet.constrainHeight(R.id.recyclerViewCoins, fixedHeightPx);
+        }
         constraintSet.applyTo(constraintLayout);
     }
 
