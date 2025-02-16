@@ -371,8 +371,9 @@ public class ApiActivity extends AppCompatActivity {
         ConstraintSet constraintSet = new ConstraintSet();
         constraintSet.clone(constraintLayout);
         if (coinList.size() >= COIN_COUNT_THRESHOLD) {
-            int fixedHeightPx = (int) (RECYCLER_FIXED_HEIGHT_DP * getResources().getDisplayMetrics().density);
-            constraintSet.constrainHeight(R.id.recyclerViewCoins, fixedHeightPx);
+//            int fixedHeightPx = (int) (RECYCLER_FIXED_HEIGHT_DP * getResources().getDisplayMetrics().density);
+//            constraintSet.constrainHeight(R.id.recyclerViewCoins, fixedHeightPx);
+            constraintSet.constrainHeight(R.id.recyclerViewCoins, ConstraintSet.MATCH_CONSTRAINT);
         }
         constraintSet.applyTo(constraintLayout);
     }
