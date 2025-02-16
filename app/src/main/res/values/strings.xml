@@ -3,4 +3,6 @@
     <string name="best_group">Best Group</string>
     <string name="go_to_api_screen">API Screen</string>
     <string name="go_to_firebase_screen">Firebase Screen</string>
+    <string name="loading">Loading...</string>
+    <string name="fetch_crypto_data">Fetch Crypto Data</string>
 </resources>
