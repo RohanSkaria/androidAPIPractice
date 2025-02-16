@@ -29,14 +29,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-/**
- * Demonstration:
- * - (Spinner Option 1) fetchCoinGeckoBitcoin() [unchanged, single call for BTC]
- * - (Spinner Option 2) fetchCoinPaprikaTop10() (Top 10 coins)
- * - (Spinner Option 3) fetchCoinCapWorst3()    (Lowest 3 by volume)
- * <p>
- * Now also supports saving 'notes' with timestamps in JSON.
- */
 
 public class ApiActivity extends AppCompatActivity {
 
@@ -385,7 +377,6 @@ public class ApiActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        // Save coinList as a JSON string
         String json = convertCoinListToJson(coinList);
         outState.putString(KEY_COIN_LIST, json);
     }
@@ -401,7 +392,6 @@ public class ApiActivity extends AppCompatActivity {
                 obj.put("priceUsd", coin.getPriceUsd());
                 obj.put("logoUrl", coin.getLogoUrl());
 
-                // Store the notes (which may include timestamps)
                 JSONArray notesArr = new JSONArray();
                 for (String note : coin.getNotes()) {
                     notesArr.put(note);

@@ -131,15 +131,12 @@ public class CryptoCoinAdapter extends RecyclerView.Adapter<CryptoCoinAdapter.Co
         return coinList.size();
     }
 
-    // Optionally allow updating the list at runtime
     public void updateList(List<CryptoCoin> newList) {
         this.coinList = newList;
         notifyDataSetChanged();
     }
 
-    // ----------------------------------------------------
-    // ViewHolder
-    // ----------------------------------------------------
+
     class CoinViewHolder extends RecyclerView.ViewHolder {
 
         private ImageView imageViewLogo;
