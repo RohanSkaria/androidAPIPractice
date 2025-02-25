@@ -14,6 +14,7 @@ public class MainActivity extends AppCompatActivity {
 
         Button btnApi = findViewById(R.id.buttonApi);
         Button btnFirebase = findViewById(R.id.buttonFirebase);
+        Button btnAbout = findViewById(R.id.buttonAbout);
 
 
         btnApi.setOnClickListener(view -> {
@@ -25,5 +26,11 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(this, FirebaseActivity.class);
             startActivity(intent);
         });
+
+        btnAbout.setOnClickListener(v -> {
+            Intent intent = new Intent(this, AboutActivity.class);
+            startActivity(intent);
+        });
+
     }
 }

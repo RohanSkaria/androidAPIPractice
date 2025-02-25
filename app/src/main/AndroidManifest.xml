@@ -37,6 +37,8 @@
             android:windowSoftInputMode="adjustPan"
             android:exported="true" />
 
+        <activity android:name=".AboutActivity" />
+
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
