@@ -18,6 +18,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -209,6 +210,26 @@ public class FirebaseActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        // No need to reload the entire activity
+        // Just adjust layouts if needed
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            // Apply landscape-specific adjustments
+            if (recyclerViewContent != null && recyclerViewContent.getLayoutManager() instanceof GridLayoutManager) {
+                // For sticker grid, increase the span count in landscape mode
+                ((GridLayoutManager) recyclerViewContent.getLayoutManager()).setSpanCount(5);
+            }
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            // Reset to portrait-specific adjustments
+            if (recyclerViewContent != null && recyclerViewContent.getLayoutManager() instanceof GridLayoutManager) {
+                // For sticker grid, use default span count in portrait
+                ((GridLayoutManager) recyclerViewContent.getLayoutManager()).setSpanCount(3);
+            }
+        }
+    }
     private void setupStickerSelection() {
         // Reset selection
         selectedSticker = null;
