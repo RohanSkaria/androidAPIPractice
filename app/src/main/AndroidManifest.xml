@@ -31,8 +31,9 @@
 
         <activity
             android:name=".FirebaseActivity"
-            android:exported="true" />
-
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:exported="true">
+        </activity>
 
         <activity
             android:name=".ApiActivity"
