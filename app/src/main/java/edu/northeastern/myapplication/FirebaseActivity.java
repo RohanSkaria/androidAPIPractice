@@ -25,57 +25,58 @@ import java.util.Map;
 public class FirebaseActivity extends AppCompatActivity {
     private static final String TAG = "FrebaeActivity";
 
-    // UI Elements
-    private EditText etUsername, etFriendUsername;
-    private Button btnLogin, btnSendSticker, btnAbout, btnBackFromAbout;
+    // UI
     private LinearLayout loginPanel, mainPanel, aboutPanel;
+    private EditText etUsername, etPassword, etFriendUsername;
+    private Button btnLogin, btnSendSticker, btnAbout, btnBackFromAbout;
     private Spinner spinnerStickers;
-    private TextView tvStickerCounts, tvHistory, tvGroupName;
+    private TextView tvGroupName, tvStickerCounts, tvHistory;
 
-    // Firebase references
+    // Firebase
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference rootRef;
 
-    // Local user
+    // The user currently logged in
     private String currentUser = null;
 
-    // Notification channel
+    // For notifications
     private static final String CHANNEL_ID = "stickers_channel_id";
 
-    // Some example sticker IDs (could map to resource drawables in your code)
-    // In a real app, you'd store these images in res/drawable and reference them by ID.
-    // Here we’re just giving them symbolic names.
-    private static final String[] STICKER_IDS = {"sticker_heart", "sticker_smile", "sticker_thumbs_up", "unknown_sticker"};
+    // Example sticker set
+    private static final String[] STICKER_IDS = {
+            "sticker_heart", "sticker_smile", "sticker_thumbs_up"
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_firebase);
 
-        // 1) Initialize Firebase
+        // Initialize Firebase
         FirebaseApp.initializeApp(this);
         firebaseDatabase = FirebaseDatabase.getInstance();
         rootRef = firebaseDatabase.getReference();
 
-        // 2) Setup Notification Channel (for Android 8.0+)
+        // Create notification channel (Android 8.0+)
         createNotificationChannel();
 
-        // 3) Find Views
+        // Find views
         loginPanel       = findViewById(R.id.loginPanel);
         mainPanel        = findViewById(R.id.mainPanel);
         aboutPanel       = findViewById(R.id.aboutPanel);
         etUsername       = findViewById(R.id.etUsername);
+        etPassword       = findViewById(R.id.etPassword);
         etFriendUsername = findViewById(R.id.etFriendUsername);
         btnLogin         = findViewById(R.id.btnLogin);
         btnSendSticker   = findViewById(R.id.btnSendSticker);
         btnAbout         = findViewById(R.id.btnAbout);
         btnBackFromAbout = findViewById(R.id.btnBackFromAbout);
         spinnerStickers  = findViewById(R.id.spinnerStickers);
+        tvGroupName      = findViewById(R.id.tvGroupName);
         tvStickerCounts  = findViewById(R.id.tvStickerCounts);
         tvHistory        = findViewById(R.id.tvHistory);
-        tvGroupName      = findViewById(R.id.tvGroupName);
 
-        // 4) Populate sticker spinner
+        // Spinner with sticker IDs
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_spinner_item,
@@ -84,52 +85,53 @@ public class FirebaseActivity extends AppCompatActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerStickers.setAdapter(adapter);
 
-        // 5) Set up click listeners
+        // Click listeners
         btnLogin.setOnClickListener(v -> doLogin());
         btnSendSticker.setOnClickListener(v -> sendSticker());
         btnAbout.setOnClickListener(v -> showAboutPanel(true));
         btnBackFromAbout.setOnClickListener(v -> showAboutPanel(false));
-
-        // 6) Show group name on main screen
-        // (You can hardcode or load from strings.xml)
-        tvGroupName.setText("Group: MyAwesomeGroup");
-
-        // If you want to auto-login a previously used username, you could read from SharedPreferences here.
-        // For the assignment, a simple approach is to have the user type in a name each time.
     }
-
-    // ------------------------------------------------------------------------------
-    // LOGIN LOGIC (No Password)
-    // ------------------------------------------------------------------------------
 
     private void doLogin() {
         String enteredUser = etUsername.getText().toString().trim();
+        String enteredPass = etPassword.getText().toString().trim();
+
         if (enteredUser.isEmpty()) {
             Toast.makeText(this, "Please enter a username!", Toast.LENGTH_SHORT).show();
             return;
         }
-        // Accept this username with no password check
+        // ANY password is accepted per assignment instructions
+        // We do NOT validate 'enteredPass' at all.
+
         currentUser = enteredUser;
 
-        // Optionally store in SharedPreferences if you want to persist next time
-        // SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
-        // prefs.edit().putString("username", currentUser).apply();
+        // (Optional) Create/Update user record in Firebase
+        DatabaseReference userRef = rootRef.child("users").child(currentUser);
+        Map<String, Object> userData = new HashMap<>();
+        userData.put("username", currentUser);
+        userData.put("password", enteredPass); // storing it, but not validating
+        userData.put("lastLogin", System.currentTimeMillis());
+        userRef.updateChildren(userData)
+                .addOnSuccessListener(aVoid ->
+                        Log.d(TAG, "User record created/updated in Firebase"))
+                .addOnFailureListener(e ->
+                        Log.e(TAG, "Failed to update user record: " + e.getMessage()));
 
-        Toast.makeText(this, "Logged in as " + currentUser, Toast.LENGTH_SHORT).show();
-        showLoginPanel(false);
+        // Show message
+        Toast.makeText(this, "Logged in as " + currentUser
+                + " (password ignored)", Toast.LENGTH_LONG).show();
+
+        // Switch panels
+        loginPanel.setVisibility(View.GONE);
+        mainPanel.setVisibility(View.VISIBLE);
+
+        // Start listening for incoming stickers
         setupReceiveStickersListener();
+
+        // Load counts and history from Firebase
         loadStickerCounts();
         loadReceivedHistory();
     }
-
-    private void showLoginPanel(boolean show) {
-        loginPanel.setVisibility(show ? View.VISIBLE : View.GONE);
-        mainPanel.setVisibility(show ? View.GONE : View.VISIBLE);
-    }
-
-    // ------------------------------------------------------------------------------
-    // SENDING STICKERS
-    // ------------------------------------------------------------------------------
 
     private void sendSticker() {
         if (currentUser == null) {
@@ -149,11 +151,11 @@ public class FirebaseActivity extends AppCompatActivity {
             return;
         }
 
-        // 1) Write to /stickersReceived/<friendUser>/someAutoKey with {from, stickerId, timestamp}
+        // Write a new "received" record for friendUser
         DatabaseReference friendInboxRef = rootRef.child("stickersReceived").child(friendUser);
         String key = friendInboxRef.push().getKey();
         if (key == null) {
-            Log.e(TAG, "Failed to get push key for friendInboxRef!");
+            Log.e(TAG, "Failed to get push key!");
             return;
         }
 
@@ -161,13 +163,14 @@ public class FirebaseActivity extends AppCompatActivity {
         data.put("from", currentUser);
         data.put("stickerId", selectedSticker);
         data.put("timestamp", System.currentTimeMillis());
+
         friendInboxRef.child(key).setValue(data)
                 .addOnSuccessListener(aVoid ->
                         Log.d(TAG, "Sent sticker " + selectedSticker + " to " + friendUser))
                 .addOnFailureListener(e ->
                         Log.e(TAG, "Failed to send sticker: " + e.getMessage()));
 
-        // 2) Update the “count” of how many times currentUser has sent that sticker
+        // Update the count for the currentUser
         DatabaseReference senderCountRef = rootRef
                 .child("users")
                 .child(currentUser)
@@ -200,28 +203,23 @@ public class FirebaseActivity extends AppCompatActivity {
         Toast.makeText(this, "Sticker sent to " + friendUser + "!", Toast.LENGTH_SHORT).show();
     }
 
-    // ------------------------------------------------------------------------------
-    // RECEIVE STICKERS (LISTENER + NOTIFICATION)
-    // ------------------------------------------------------------------------------
-
     private void setupReceiveStickersListener() {
-        // Listen for new children in /stickersReceived/<currentUser>
-        DatabaseReference myInboxRef = rootRef.child("stickersReceived").child(currentUser);
-        myInboxRef.addChildEventListener(new ChildEventListener() {
+        DatabaseReference inboxRef = rootRef.child("stickersReceived").child(currentUser);
+        inboxRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, String previousChildName) {
                 // A new sticker was received
-                Map<String, Object> data = (Map<String, Object>) snapshot.getValue();
-                if (data == null) return;
+                Map<String, Object> stickerData = (Map<String, Object>) snapshot.getValue();
+                if (stickerData != null) {
+                    String from = (String) stickerData.get("from");
+                    String stickerId = (String) stickerData.get("stickerId");
 
-                String from = (String) data.get("from");
-                String stickerId = (String) data.get("stickerId");
+                    // Show notification
+                    showStickerNotification(from, stickerId);
 
-                // Show a notification with more than just text
-                showStickerNotification(from, stickerId);
-
-                // Reload history to show the newly received sticker
-                loadReceivedHistory();
+                    // Reload history
+                    loadReceivedHistory();
+                }
             }
 
             @Override public void onChildChanged(@NonNull DataSnapshot snapshot, String previousChildName) {}
@@ -232,23 +230,20 @@ public class FirebaseActivity extends AppCompatActivity {
     }
 
     private void showStickerNotification(String fromUser, String stickerId) {
-        // For the assignment, we want to show something more than plain text.
-        // Example: set a small icon, big text, or large icon style, etc.
-        String contentTitle = "New Sticker from " + fromUser;
-        String contentText = "Sticker: " + stickerId;
+        String title = "New Sticker from " + fromUser;
+        String text = "Sticker: " + stickerId;
 
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(this, CHANNEL_ID)
-                        .setSmallIcon(android.R.drawable.star_big_on) // Just an example icon
-                        .setContentTitle(contentTitle)
-                        .setContentText(contentText)
+                        .setSmallIcon(android.R.drawable.star_big_on) // example icon
+                        .setContentTitle(title)
+                        .setContentText(text)
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
-                        // Example of adding "big text style" to be more than plain text:
                         .setStyle(new NotificationCompat.BigTextStyle()
-                                .bigText("You received sticker: " + stickerId + "\nTap to view."))
+                                .bigText("You received " + stickerId + " from " + fromUser + "!"))
                         .setAutoCancel(true);
 
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        NotificationManagerCompat manager = NotificationManagerCompat.from(this);
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -259,29 +254,24 @@ public class FirebaseActivity extends AppCompatActivity {
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        notificationManager.notify((int) System.currentTimeMillis(), builder.build());
+        manager.notify((int) System.currentTimeMillis(), builder.build());
     }
 
     private void createNotificationChannel() {
-        // Notification channels are required on Android 8.0+ for posting notifications
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = "Stickers Channel";
-            String description = "Channel for sticker notifications";
+            CharSequence name = "Sticker Channel";
+            String desc = "Channel for sticker notifications";
             int importance = NotificationManager.IMPORTANCE_HIGH;
 
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
-            channel.setDescription(description);
+            channel.setDescription(desc);
 
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            if (notificationManager != null) {
-                notificationManager.createNotificationChannel(channel);
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            if (manager != null) {
+                manager.createNotificationChannel(channel);
             }
         }
     }
-
-    // ------------------------------------------------------------------------------
-    // DISPLAY COUNTS OF STICKERS SENT
-    // ------------------------------------------------------------------------------
 
     private void loadStickerCounts() {
         if (currentUser == null) return;
@@ -289,12 +279,11 @@ public class FirebaseActivity extends AppCompatActivity {
         countRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // Build a display string
                 StringBuilder sb = new StringBuilder("Counts of Stickers Sent:\n");
                 for (DataSnapshot child : snapshot.getChildren()) {
                     String stickerId = child.getKey();
                     Long count = child.getValue(Long.class);
-                    sb.append(stickerId).append(": ").append(count).append("\n");
+                    sb.append(stickerId).append(" : ").append(count).append("\n");
                 }
                 tvStickerCounts.setText(sb.toString());
             }
@@ -306,17 +295,13 @@ public class FirebaseActivity extends AppCompatActivity {
         });
     }
 
-    // ------------------------------------------------------------------------------
-    // SHOW HISTORY OF STICKERS RECEIVED
-    // ------------------------------------------------------------------------------
-
     private void loadReceivedHistory() {
         if (currentUser == null) return;
         DatabaseReference inboxRef = rootRef.child("stickersReceived").child(currentUser);
         inboxRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                StringBuilder sb = new StringBuilder("History of Stickers Received:\n");
+                StringBuilder sb = new StringBuilder("History of Received Stickers:\n");
                 for (DataSnapshot child : snapshot.getChildren()) {
                     Map<String, Object> data = (Map<String, Object>) child.getValue();
                     if (data == null) continue;
@@ -325,15 +310,9 @@ public class FirebaseActivity extends AppCompatActivity {
                     String stickerId = (String) data.get("stickerId");
                     Long timestamp = (Long) data.get("timestamp");
 
-                    // Handle unknown sticker ID gracefully
-                    String displaySticker = stickerId;
-                    if (!isKnownStickerId(stickerId)) {
-                        displaySticker = "Unknown Sticker";
-                    }
-
                     sb.append("From: ").append(from)
-                            .append(" | Sticker: ").append(displaySticker)
-                            .append(" | When: ").append(timestampToString(timestamp))
+                            .append(" | Sticker: ").append(stickerId)
+                            .append(" | When: ").append(timestamp)
                             .append("\n");
                 }
                 tvHistory.setText(sb.toString());
@@ -345,23 +324,6 @@ public class FirebaseActivity extends AppCompatActivity {
             }
         });
     }
-
-    private boolean isKnownStickerId(String stickerId) {
-        for (String s : STICKER_IDS) {
-            if (s.equals(stickerId)) return true;
-        }
-        return false;
-    }
-
-    private String timestampToString(Long timestamp) {
-        if (timestamp == null) return "Unknown time";
-        // Could convert to a Date format, but for simplicity:
-        return String.valueOf(timestamp);
-    }
-
-    // ------------------------------------------------------------------------------
-    // ABOUT SCREEN
-    // ------------------------------------------------------------------------------
 
     private void showAboutPanel(boolean show) {
         aboutPanel.setVisibility(show ? View.VISIBLE : View.GONE);
