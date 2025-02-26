@@ -1,22 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/firebaseLayout"
+    android:id="@+id/rootLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".FirebaseActivity">
+    android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/tvFirebasePlaceholder"
-        android:layout_width="wrap_content"
+    <!-- This "login panel" is only shown if user not logged in -->
+    <LinearLayout
+        android:id="@+id/loginPanel"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/firebase_screen_placeholder"
-        android:textSize="20sp"
-        android:textStyle="bold"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:gravity="center"
+        android:padding="16dp">
+
+        <EditText
+            android:id="@+id/etUsername"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="Enter Username" />
+
+        <Button
+            android:id="@+id/btnLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Login" />
+    </LinearLayout>
+
+    <!-- Main content panel, shown once user is logged in -->
+    <LinearLayout
+        android:id="@+id/mainPanel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:padding="16dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tvGroupName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Group: (Your Group Name Here)"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/etFriendUsername"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Friend's Username" />
+
+        <!-- Example spinner for choosing a sticker
+             (Alternatively, you could show multiple ImageButtons.) -->
+        <Spinner
+            android:id="@+id/spinnerStickers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/btnSendSticker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Send Sticker" />
+
+        <TextView
+            android:id="@+id/tvStickerCounts"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Counts of Stickers Sent: (will load from DB)"
+            android:layout_marginTop="16dp"/>
+
+        <TextView
+            android:id="@+id/tvHistory"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="16dp"
+            android:text="History of Received Stickers" />
+
+        <Button
+            android:id="@+id/btnAbout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="About" />
+    </LinearLayout>
+
+    <!-- "About" view, toggled on/off when user presses "About" -->
+    <LinearLayout
+        android:id="@+id/aboutPanel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:padding="16dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tvAbout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Group Members:\n1) Alice (aliceGit)\n2) Bob (bobGit)\n3) Carol (carolGit)"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/btnBackFromAbout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Back" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
