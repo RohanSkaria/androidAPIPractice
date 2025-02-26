@@ -1,17 +1,15 @@
 plugins {
-    // Apply the Android application plugin (from your version catalog)
     alias(libs.plugins.android.application)
 
-    // Apply the Google Services plugin to this module
     id("com.google.gms.google-services")
 }
 
 android {
-    namespace = "edu.northeastern.myapplication"  // adjust if needed
+    namespace = "edu.northeastern.myapplication"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "edu.northeastern.myapplication" // adjust if needed
+        applicationId = "edu.northeastern.myapplication"
         minSdk = 27
         targetSdk = 34
         versionCode = 1
@@ -36,7 +34,7 @@ android {
 }
 
 dependencies {
-    // Your existing dependencies
+
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
@@ -46,7 +44,6 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
-    // Use the Firebase BoM for version alignment
     implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
 
     // Firebase Realtime Database

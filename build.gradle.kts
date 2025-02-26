@@ -17,4 +17,3 @@ plugins {
 //         mavenCentral()
 //     }
 // }
-// or in your `settings.gradle.kts`.

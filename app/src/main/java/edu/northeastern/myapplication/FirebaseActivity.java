@@ -2,331 +2,329 @@ package edu.northeastern.myapplication;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.os.Build;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.database.*;
+import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 public class FirebaseActivity extends AppCompatActivity {
-    private static final String TAG = "FirebaseActivity";
 
-    // UI
-    private LinearLayout loginPanel, mainPanel, aboutPanel;
-    private EditText etUsername, etPassword, etFriendUsername;
-    private Button btnLogin, btnSendSticker, btnAbout, btnBackFromAbout;
-    private Spinner spinnerStickers;
-    private TextView tvGroupName, tvStickerCounts, tvHistory;
+    // Constants
+    private static final String PREFS_NAME = "StickerAppPrefs";
+    private static final String KEY_USERNAME = "username";
+
+    // UI Components
+    private EditText editTextUsername;
+    private Button btnLogin;
+    private View loginLayout;
+    private View mainLayout;
+    private TabLayout tabLayout;
+    private RecyclerView recyclerViewContent;
+    private TextView noDataTextView;
 
     // Firebase
-    private FirebaseDatabase firebaseDatabase;
-    private DatabaseReference rootRef;
+    private FirebaseDatabase database;
+    private DatabaseReference usersRef;
+    private DatabaseReference messagesRef;
 
-    // The user currently logged in
-    private String currentUser = null;
+    // Adapters
+    private StickerAdapter stickerAdapter;
+    private FriendAdapter friendAdapter;
 
-    // For notifications
-    private static final String CHANNEL_ID = "stickers_channel_id";
+    // Data
+    private String currentUsername;
+    private List<Sticker> availableStickers;
+    private List<String> availableFriends;
 
-    // Example sticker set
-    private static final String[] STICKER_IDS = {
-            "sticker_heart", "sticker_smile", "sticker_thumbs_up"
-    };
+    // Currently selected items
+    private Sticker selectedSticker;
+
+    private List<StickerMessage> receivedMessages;
+    private HistoryAdapter historyAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_firebase);
+        getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit().clear().apply();
 
         // Initialize Firebase
-        FirebaseApp.initializeApp(this);
-        firebaseDatabase = FirebaseDatabase.getInstance();
-        rootRef = firebaseDatabase.getReference();
+        database = FirebaseDatabase.getInstance();
+        usersRef = database.getReference("users");
+        messagesRef = database.getReference("messages");
 
-        // Create notification channel (Android 8.0+)
-        createNotificationChannel();
+        // Initialize UI components
+        editTextUsername = findViewById(R.id.editTextUsername);
+        btnLogin = findViewById(R.id.btnLogin);
+        loginLayout = findViewById(R.id.loginLayout);
+        mainLayout = findViewById(R.id.mainLayout);
+        tabLayout = findViewById(R.id.tabLayout);
+        recyclerViewContent = findViewById(R.id.recyclerViewContent);
+        noDataTextView = findViewById(R.id.noDataTextView);
 
-        // Find views
-        loginPanel       = findViewById(R.id.loginPanel);
-        mainPanel        = findViewById(R.id.mainPanel);
-        aboutPanel       = findViewById(R.id.aboutPanel);
-        etUsername       = findViewById(R.id.etUsername);
-        etPassword       = findViewById(R.id.etPassword);
-        etFriendUsername = findViewById(R.id.etFriendUsername);
-        btnLogin         = findViewById(R.id.btnLogin);
-        btnSendSticker   = findViewById(R.id.btnSendSticker);
-        btnAbout         = findViewById(R.id.btnAbout);
-        btnBackFromAbout = findViewById(R.id.btnBackFromAbout);
-        spinnerStickers  = findViewById(R.id.spinnerStickers);
-        tvGroupName      = findViewById(R.id.tvGroupName);
-        tvStickerCounts  = findViewById(R.id.tvStickerCounts);
-        tvHistory        = findViewById(R.id.tvHistory);
+        // Initialize sticker data
+        initializeStickers();
 
-        // Spinner with sticker IDs
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_spinner_item,
-                STICKER_IDS
+        // Setup login button
+        btnLogin.setOnClickListener(v -> {
+            String username = editTextUsername.getText().toString().trim();
+            if (username.isEmpty()) {
+                Toast.makeText(this, "Please enter a username", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Save username
+            currentUsername = username;
+            SharedPreferences.Editor editor = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
+            editor.putString(KEY_USERNAME, currentUsername);
+            editor.apply();
+
+            // Register user in Firebase
+            registerUserInFirebase(username);
+
+            // Switch to main layout
+            loginLayout.setVisibility(View.GONE);
+            mainLayout.setVisibility(View.VISIBLE);
+
+            // Setup tabs
+            setupTabLayout();
+
+            // Show stickers by default
+            setupStickerSelection();
+        });
+
+        // Check if user is already logged in
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String savedUsername = prefs.getString(KEY_USERNAME, null);
+        if (savedUsername != null) {
+            currentUsername = savedUsername;
+            loginLayout.setVisibility(View.GONE);
+            mainLayout.setVisibility(View.VISIBLE);
+
+            // Setup tabs
+            setupTabLayout();
+
+            // Show stickers by default
+            setupStickerSelection();
+        } else {
+            loginLayout.setVisibility(View.VISIBLE);
+            mainLayout.setVisibility(View.GONE);
+        }
+    }
+
+    private void initializeStickers() {
+        availableStickers = new ArrayList<>();
+
+        // Add your stickers here (you should add drawables to your project)
+        availableStickers.add(new Sticker("sticker_1", "Happy Face", R.drawable.sticker_happy));
+        availableStickers.add(new Sticker("sticker_2", "Sad Face", R.drawable.sticker_sad));
+        availableStickers.add(new Sticker("sticker_3", "Thumbs Up", R.drawable.sticker_thumbs_up));
+        availableStickers.add(new Sticker("sticker_4", "Heart", R.drawable.sticker_heart));
+        availableStickers.add(new Sticker("sticker_5", "Party", R.drawable.sticker_party));
+    }
+
+    private void registerUserInFirebase(String username) {
+        usersRef.child(username).setValue(true);
+    }
+
+    private void setupTabLayout() {
+        tabLayout.removeAllTabs();
+        tabLayout.addTab(tabLayout.newTab().setText("Send Sticker"));
+        tabLayout.addTab(tabLayout.newTab().setText("History"));
+        tabLayout.addTab(tabLayout.newTab().setText("My Stats"));
+
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                int position = tab.getPosition();
+                if (position == 0) {
+                    setupStickerSelection();
+                } else if (position == 1) {
+                    setupHistoryView();
+                } else if (position == 2) {
+                    // We'll implement stats view later
+                    noDataTextView.setText("Stats view not implemented yet");
+                    noDataTextView.setVisibility(View.VISIBLE);
+                    recyclerViewContent.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+                // Not needed
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+                // Not needed
+            }
+        });
+    }
+
+    private void setupStickerSelection() {
+        // Reset selection
+        selectedSticker = null;
+
+        // Show stickers grid
+        stickerAdapter = new StickerAdapter(availableStickers, this::onStickerSelected);
+        recyclerViewContent.setLayoutManager(new GridLayoutManager(this, 3));
+        recyclerViewContent.setAdapter(stickerAdapter);
+
+        noDataTextView.setVisibility(View.GONE);
+        recyclerViewContent.setVisibility(View.VISIBLE);
+    }
+
+    private void onStickerSelected(Sticker sticker) {
+        // Save the selected sticker
+        selectedSticker = sticker;
+
+        // Now show friends for selection
+        loadFriends();
+    }
+
+    private void loadFriends() {
+        usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                availableFriends = new ArrayList<>();
+
+                for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
+                    String username = userSnapshot.getKey();
+                    if (username != null && !username.equals(currentUsername)) {
+                        availableFriends.add(username);
+                    }
+                }
+
+                if (availableFriends.isEmpty()) {
+                    noDataTextView.setText("No friends available. You need other users to send stickers.");
+                    noDataTextView.setVisibility(View.VISIBLE);
+                    recyclerViewContent.setVisibility(View.GONE);
+                } else {
+                    noDataTextView.setVisibility(View.GONE);
+                    recyclerViewContent.setVisibility(View.VISIBLE);
+
+                    // Show friends list
+                    friendAdapter = new FriendAdapter(availableFriends, FirebaseActivity.this::onFriendSelected);
+                    recyclerViewContent.setLayoutManager(new LinearLayoutManager(FirebaseActivity.this));
+                    recyclerViewContent.setAdapter(friendAdapter);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(FirebaseActivity.this, "Failed to load friends: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void onFriendSelected(String friend) {
+        // Send the sticker
+        if (selectedSticker != null) {
+            sendSticker(selectedSticker, friend);
+        }
+    }
+
+    private void sendSticker(Sticker sticker, String recipient) {
+        // Create message object
+        StickerMessage message = new StickerMessage(
+                currentUsername,
+                recipient,
+                sticker.getId(),
+                System.currentTimeMillis()
         );
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerStickers.setAdapter(adapter);
 
-        // Click listeners
-        btnLogin.setOnClickListener(v -> doLogin());
-        btnSendSticker.setOnClickListener(v -> sendSticker());
-        btnAbout.setOnClickListener(v -> showAboutPanel(true));
-        btnBackFromAbout.setOnClickListener(v -> showAboutPanel(false));
-    }
+        // Push to database
+        String messageId = messagesRef.push().getKey();
+        if (messageId != null) {
+            messagesRef.child(messageId).setValue(message)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(FirebaseActivity.this, "Sticker sent to " + recipient, Toast.LENGTH_SHORT).show();
 
-    private void doLogin() {
-        String enteredUser = etUsername.getText().toString().trim();
-        String enteredPass = etPassword.getText().toString().trim();
+                        // Also update sent count (we'll implement this later)
+                        updateSentStickerCount(sticker.getId());
 
-        if (enteredUser.isEmpty()) {
-            Toast.makeText(this, "Please enter a username!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        // ANY password is accepted per assignment instructions
-        // We do NOT validate 'enteredPass' at all.
-
-        currentUser = enteredUser;
-
-        // (Optional) Create/Update user record in Firebase
-        DatabaseReference userRef = rootRef.child("users").child(currentUser);
-        Map<String, Object> userData = new HashMap<>();
-        userData.put("username", currentUser);
-        userData.put("password", enteredPass); // storing it, but not validating
-        userData.put("lastLogin", System.currentTimeMillis());
-        userRef.updateChildren(userData)
-                .addOnSuccessListener(aVoid ->
-                        Log.d(TAG, "User record created/updated in Firebase"))
-                .addOnFailureListener(e ->
-                        Log.e(TAG, "Failed to update user record: " + e.getMessage()));
-
-        // Show message
-        Toast.makeText(this, "Logged in as " + currentUser
-                + " (password ignored)", Toast.LENGTH_LONG).show();
-
-        // Switch panels
-        loginPanel.setVisibility(View.GONE);
-        mainPanel.setVisibility(View.VISIBLE);
-
-        // Start listening for incoming stickers
-        setupReceiveStickersListener();
-
-        // Load counts and history from Firebase
-        loadStickerCounts();
-        loadReceivedHistory();
-    }
-
-    private void sendSticker() {
-        if (currentUser == null) {
-            Toast.makeText(this, "Not logged in!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        String friendUser = etFriendUsername.getText().toString().trim();
-        if (friendUser.isEmpty()) {
-            Toast.makeText(this, "Enter your friend's username!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        String selectedSticker = (String) spinnerStickers.getSelectedItem();
-        if (selectedSticker == null) {
-            Toast.makeText(this, "No sticker selected!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Write a new "received" record for friendUser
-        DatabaseReference friendInboxRef = rootRef.child("stickersReceived").child(friendUser);
-        String key = friendInboxRef.push().getKey();
-        if (key == null) {
-            Log.e(TAG, "Failed to get push key!");
-            return;
-        }
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("from", currentUser);
-        data.put("stickerId", selectedSticker);
-        data.put("timestamp", System.currentTimeMillis());
-
-        friendInboxRef.child(key).setValue(data)
-                .addOnSuccessListener(aVoid ->
-                        Log.d(TAG, "Sent sticker " + selectedSticker + " to " + friendUser))
-                .addOnFailureListener(e ->
-                        Log.e(TAG, "Failed to send sticker: " + e.getMessage()));
-
-        // Update the count for the currentUser
-        DatabaseReference senderCountRef = rootRef
-                .child("users")
-                .child(currentUser)
-                .child("sentCount")
-                .child(selectedSticker);
-
-        senderCountRef.runTransaction(new Transaction.Handler() {
-            @NonNull
-            @Override
-            public Transaction.Result doTransaction(@NonNull MutableData currentData) {
-                Long currentValue = currentData.getValue(Long.class);
-                if (currentValue == null) {
-                    currentData.setValue(1L);
-                } else {
-                    currentData.setValue(currentValue + 1);
-                }
-                return Transaction.success(currentData);
-            }
-
-            @Override
-            public void onComplete(DatabaseError error, boolean committed, DataSnapshot currentData) {
-                if (error != null) {
-                    Log.e(TAG, "Transaction failed: " + error.getMessage());
-                } else {
-                    Log.d(TAG, "Sticker count updated successfully.");
-                }
-            }
-        });
-
-        Toast.makeText(this, "Sticker sent to " + friendUser + "!", Toast.LENGTH_SHORT).show();
-    }
-
-    private void setupReceiveStickersListener() {
-        DatabaseReference inboxRef = rootRef.child("stickersReceived").child(currentUser);
-        inboxRef.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot snapshot, String previousChildName) {
-                // A new sticker was received
-                Map<String, Object> stickerData = (Map<String, Object>) snapshot.getValue();
-                if (stickerData != null) {
-                    String from = (String) stickerData.get("from");
-                    String stickerId = (String) stickerData.get("stickerId");
-
-                    // Show notification
-                    showStickerNotification(from, stickerId);
-
-                    // Reload history
-                    loadReceivedHistory();
-                }
-            }
-
-            @Override public void onChildChanged(@NonNull DataSnapshot snapshot, String previousChildName) {}
-            @Override public void onChildRemoved(@NonNull DataSnapshot snapshot) {}
-            @Override public void onChildMoved(@NonNull DataSnapshot snapshot, String previousChildName) {}
-            @Override public void onCancelled(@NonNull DatabaseError error) {}
-        });
-    }
-
-    private void showStickerNotification(String fromUser, String stickerId) {
-        String title = "New Sticker from " + fromUser;
-        String text = "Sticker: " + stickerId;
-
-        NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(this, CHANNEL_ID)
-                        .setSmallIcon(android.R.drawable.star_big_on) // example icon
-                        .setContentTitle(title)
-                        .setContentText(text)
-                        .setPriority(NotificationCompat.PRIORITY_HIGH)
-                        .setStyle(new NotificationCompat.BigTextStyle()
-                                .bigText("You received " + stickerId + " from " + fromUser + "!"))
-                        .setAutoCancel(true);
-
-        NotificationManagerCompat manager = NotificationManagerCompat.from(this);
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        manager.notify((int) System.currentTimeMillis(), builder.build());
-    }
-
-    private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = "Sticker Channel";
-            String desc = "Channel for sticker notifications";
-            int importance = NotificationManager.IMPORTANCE_HIGH;
-
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
-            channel.setDescription(desc);
-
-            NotificationManager manager = getSystemService(NotificationManager.class);
-            if (manager != null) {
-                manager.createNotificationChannel(channel);
-            }
+                        // Go back to sticker selection
+                        setupStickerSelection();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(FirebaseActivity.this, "Failed to send sticker: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
         }
     }
 
-    private void loadStickerCounts() {
-        if (currentUser == null) return;
-        DatabaseReference countRef = rootRef.child("users").child(currentUser).child("sentCount");
-        countRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                StringBuilder sb = new StringBuilder("Counts of Stickers Sent:\n");
-                for (DataSnapshot child : snapshot.getChildren()) {
-                    String stickerId = child.getKey();
-                    Long count = child.getValue(Long.class);
-                    sb.append(stickerId).append(" : ").append(count).append("\n");
-                }
-                tvStickerCounts.setText(sb.toString());
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG, "loadStickerCounts cancelled: " + error.getMessage());
-            }
-        });
+    private void updateSentStickerCount(String stickerId) {
+        // We'll implement this in the next part
+        // This will track how many of each sticker a user has sent
     }
 
-    private void loadReceivedHistory() {
-        if (currentUser == null) return;
-        DatabaseReference inboxRef = rootRef.child("stickersReceived").child(currentUser);
-        inboxRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                StringBuilder sb = new StringBuilder("History of Received Stickers:\n");
-                for (DataSnapshot child : snapshot.getChildren()) {
-                    Map<String, Object> data = (Map<String, Object>) child.getValue();
-                    if (data == null) continue;
-
-                    String from = (String) data.get("from");
-                    String stickerId = (String) data.get("stickerId");
-                    Long timestamp = (Long) data.get("timestamp");
-
-                    sb.append("From: ").append(from)
-                            .append(" | Sticker: ").append(stickerId)
-                            .append(" | When: ").append(timestamp)
-                            .append("\n");
-                }
-                tvHistory.setText(sb.toString());
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG, "loadReceivedHistory cancelled: " + error.getMessage());
-            }
-        });
+    private void setupHistoryView() {
+        loadReceivedMessages();
     }
 
-    private void showAboutPanel(boolean show) {
-        aboutPanel.setVisibility(show ? View.VISIBLE : View.GONE);
-        mainPanel.setVisibility(show ? View.GONE : View.VISIBLE);
+    private void loadReceivedMessages() {
+        messagesRef.orderByChild("recipient").equalTo(currentUsername)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        receivedMessages = new ArrayList<>();
+
+                        for (DataSnapshot messageSnapshot : dataSnapshot.getChildren()) {
+                            StickerMessage message = messageSnapshot.getValue(StickerMessage.class);
+                            if (message != null) {
+                                receivedMessages.add(message);
+                            }
+                        }
+
+                        //timestamping
+                        Collections.sort(receivedMessages, (m1, m2) ->
+                                Long.compare(m2.getTimestamp(), m1.getTimestamp()));
+
+                        if (receivedMessages.isEmpty()) {
+                            noDataTextView.setText("No stickers received yet");
+                            noDataTextView.setVisibility(View.VISIBLE);
+                            recyclerViewContent.setVisibility(View.GONE);
+                        } else {
+                            noDataTextView.setVisibility(View.GONE);
+                            recyclerViewContent.setVisibility(View.VISIBLE);
+
+
+                            Map<String, Integer> stickerResources = new HashMap<>();
+                            for (Sticker sticker : availableStickers) {
+                                stickerResources.put(sticker.getId(), sticker.getResourceId());
+                            }
+
+
+                            historyAdapter = new HistoryAdapter(receivedMessages, stickerResources, FirebaseActivity.this);
+                            recyclerViewContent.setLayoutManager(new LinearLayoutManager(FirebaseActivity.this));
+                            recyclerViewContent.setAdapter(historyAdapter);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        Toast.makeText(FirebaseActivity.this, "Failed to load history: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
+
 }
