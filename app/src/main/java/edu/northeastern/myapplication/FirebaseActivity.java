@@ -403,19 +403,20 @@ public class FirebaseActivity extends AppCompatActivity {
     }
 
     private void listenForNewMessages() {
+        long notifyThreshold = System.currentTimeMillis();
         messagesRef
                 .orderByChild("recipient")
                 .equalTo(currentUsername)
                 .addChildEventListener(new ChildEventListener() {
-
                     @Override
                     public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                         StickerMessage newMessage = snapshot.getValue(StickerMessage.class);
                         if (newMessage != null) {
-                            String sender = newMessage.getSender();
-                            String stickerId = newMessage.getStickerId();
-//                            Log.d("FirebaseActivity", "New Sticker from " + sender + "，stickerId=" + stickerId);
-                            showNotification(sender, stickerId);
+                            if (newMessage.getTimestamp() > notifyThreshold) {
+                                String sender = newMessage.getSender();
+                                String stickerId = newMessage.getStickerId();
+                                showNotification(sender, stickerId);
+                            }
                         }
                     }
 
