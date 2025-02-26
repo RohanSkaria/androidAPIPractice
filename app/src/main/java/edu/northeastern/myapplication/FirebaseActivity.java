@@ -264,6 +264,7 @@ public class FirebaseActivity extends AppCompatActivity {
         noDataTextView.setVisibility(View.GONE);
         recyclerViewContent.setVisibility(View.VISIBLE);
     }
+
     private void onStickerSelected(Sticker sticker) {
         // Save the selected sticker
         selectedSticker = sticker;
@@ -398,27 +399,30 @@ public class FirebaseActivity extends AppCompatActivity {
     }
 
     private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = "StickerChannel";
-            String description = "Channel for sticker notifications";
+            CharSequence name = "Sticker Notifications";
+            String description = "Channel for sticker app notifications";
             int importance = NotificationManager.IMPORTANCE_HIGH;
-            NotificationChannel channel = new NotificationChannel("STICKER_CHANNEL", name, importance);
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
             channel.setDescription(description);
-
+            // Register the channel with the system
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            if (notificationManager != null) {
-                notificationManager.createNotificationChannel(channel);
-            }
+            notificationManager.createNotificationChannel(channel);
         }
     }
 
     private void requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
+                    PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                        PERMISSION_REQUEST_CODE);
             }
         }
     }
+
 
     private void showNotification(String sender, String stickerId) {
         // check authroity
