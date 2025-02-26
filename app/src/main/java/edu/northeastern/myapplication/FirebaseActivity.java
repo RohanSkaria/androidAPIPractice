@@ -96,6 +96,13 @@ public class FirebaseActivity extends AppCompatActivity {
         tabLayout = findViewById(R.id.tabLayout);
         recyclerViewContent = findViewById(R.id.recyclerViewContent);
         noDataTextView = findViewById(R.id.noDataTextView);
+        Button btnLogout = findViewById(R.id.btnLogout);
+        btnLogout.setOnClickListener(v -> {
+            getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit().clear().apply();
+            currentUsername = null;
+            loginLayout.setVisibility(View.VISIBLE);
+            mainLayout.setVisibility(View.GONE);
+        });
 
         // Initialize sticker data
         initializeStickers();
