@@ -131,15 +131,12 @@ public class CryptoCoinAdapter extends RecyclerView.Adapter<CryptoCoinAdapter.Co
         return coinList.size();
     }
 
-    // Optionally allow updating the list at runtime
     public void updateList(List<CryptoCoin> newList) {
         this.coinList = newList;
         notifyDataSetChanged();
     }
 
-    // ----------------------------------------------------
-    // ViewHolder
-    // ----------------------------------------------------
+
     class CoinViewHolder extends RecyclerView.ViewHolder {
 
         private ImageView imageViewLogo;
@@ -166,45 +163,41 @@ public class CryptoCoinAdapter extends RecyclerView.Adapter<CryptoCoinAdapter.Co
             tvSymbol.setText("Symbol: " + coin.getSymbol());
             tvPrice.setText(String.format("Price: $%.2f", coin.getPriceUsd()));
 
-            // Load logo (optional custom code or ImageLoader)
+
             imageViewLogo.setImageResource(R.drawable.ic_launcher_foreground);
             String logoUrl = coin.getLogoUrl();
             if (!TextUtils.isEmpty(logoUrl)) {
                 ImageLoader.loadImageAsync(logoUrl, imageViewLogo);
             }
 
-            // Clear existing dynamic note views
             layoutNotes.removeAllViews();
 
-            // Re-build the note TextViews
+
             for (String note : coin.getNotes()) {
                 TextView tvNote = new TextView(itemView.getContext());
                 tvNote.setText(note);
                 layoutNotes.addView(tvNote);
             }
 
-            // When user taps "Add Note":
+
             btnAddNote.setOnClickListener(v -> {
                 String typedText = editNoteInput.getText().toString().trim();
                 if (!typedText.isEmpty()) {
-                    // 1) Create a timestamp e.g. "[12:34:56]"
                     String timeStamp = getCurrentTimeString();
-                    // 2) Combine the timestamp + typed note
+
                     String noteWithTime = "[" + timeStamp + "] " + typedText;
 
-                    // 3) Add to the coin's notes
                     coin.getNotes().add(noteWithTime);
 
-                    // 4) Clear the input field
                     editNoteInput.setText("");
 
-                    // 5) Re-bind to update the UI (so the new note appears)
+
                     notifyItemChanged(getAdapterPosition());
                 }
             });
         }
 
-        // Helper method to get "HH:mm:ss" for current time
+        // Helper method for current time
         private String getCurrentTimeString() {
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
             return sdf.format(new Date());

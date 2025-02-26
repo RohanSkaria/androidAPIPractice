@@ -12,21 +12,25 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // 1) Find the two buttons
         Button btnApi = findViewById(R.id.buttonApi);
         Button btnFirebase = findViewById(R.id.buttonFirebase);
+        Button btnAbout = findViewById(R.id.buttonAbout);
 
-        // 2) Set click listeners
+
         btnApi.setOnClickListener(view -> {
-            // Navigate to ApiActivity
             Intent intent = new Intent(this, ApiActivity.class);
             startActivity(intent);
         });
 
         btnFirebase.setOnClickListener(view -> {
-            // Navigate to FirebaseActivity
             Intent intent = new Intent(this, FirebaseActivity.class);
             startActivity(intent);
         });
+
+        btnAbout.setOnClickListener(v -> {
+            Intent intent = new Intent(this, AboutActivity.class);
+            startActivity(intent);
+        });
+
     }
 }

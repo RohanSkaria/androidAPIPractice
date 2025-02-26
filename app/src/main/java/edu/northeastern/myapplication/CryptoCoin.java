@@ -17,7 +17,7 @@ public class CryptoCoin {
         this.symbol = symbol;
         this.priceUsd = priceUsd;
         this.logoUrl = logoUrl;
-        this.notes = new ArrayList<>();  // Initialize empty list
+        this.notes = new ArrayList<>();
     }
 
     public String getName() { return name; }
@@ -26,11 +26,5 @@ public class CryptoCoin {
     public String getLogoUrl() { return logoUrl; }
 
     public void setName(String name) { this.name = name; }
-    public void setSymbol(String symbol) { this.symbol = symbol; }
-    public void setPriceUsd(double priceUsd) { this.priceUsd = priceUsd; }
-    public void setLogoUrl(String logoUrl) { this.logoUrl = logoUrl; }
-
-    // NEW: getters/setters for notes
     public List<String> getNotes() { return notes; }
-    public void setNotes(List<String> notes) { this.notes = notes; }
 }

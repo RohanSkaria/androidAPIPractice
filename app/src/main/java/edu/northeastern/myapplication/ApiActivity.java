@@ -29,14 +29,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-/**
- * Demonstration:
- * - (Spinner Option 1) fetchCoinGeckoBitcoin() [unchanged, single call for BTC]
- * - (Spinner Option 2) fetchCoinPaprikaTop10() (Top 10 coins)
- * - (Spinner Option 3) fetchCoinCapWorst3()    (Lowest 3 by volume)
- * <p>
- * Now also supports saving 'notes' with timestamps in JSON.
- */
 
 public class ApiActivity extends AppCompatActivity {
 
@@ -63,7 +55,6 @@ public class ApiActivity extends AppCompatActivity {
         btnFetch = findViewById(R.id.btnFetch);
         recyclerView = findViewById(R.id.recyclerViewCoins);
 
-        // Setup spinner with 3 options (UPDATED: #2 is now "Top 10")
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_spinner_item,
@@ -72,14 +63,14 @@ public class ApiActivity extends AppCompatActivity {
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerApiSource.setAdapter(spinnerAdapter);
 
-        // Setup RecyclerView
+
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new CryptoCoinAdapter(coinList);
         recyclerView.setAdapter(adapter);
 
-        // Restore list if orientation changed
+
         if (savedInstanceState != null) {
-            // Rebuild coinList from a JSON string
+
             String savedJson = savedInstanceState.getString(KEY_COIN_LIST, null);
             if (savedJson != null) {
                 coinList.clear();
@@ -88,7 +79,7 @@ public class ApiActivity extends AppCompatActivity {
             }
         }
 
-        // Fetch button click
+
         btnFetch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -98,7 +89,7 @@ public class ApiActivity extends AppCompatActivity {
                         fetchCoinGeckoBitcoin();
                         break;
                     case 1:
-                        // Updated: Now top 10
+
                         fetchCoinPaprikaTop10();
                         break;
                     case 2:
@@ -109,9 +100,6 @@ public class ApiActivity extends AppCompatActivity {
         });
     }
 
-    // --------------------------------------------------------------------------------------
-    // Animated "Loading..." text
-    // --------------------------------------------------------------------------------------
     private void startLoadingAnimation() {
         tvLoading.setVisibility(View.VISIBLE);
         isLoadingAnimationActive = true;
@@ -124,7 +112,7 @@ public class ApiActivity extends AppCompatActivity {
         tvLoading.setVisibility(View.GONE);
     }
 
-    // Repeats every 500ms, cycling "Loading", "Loading.", "Loading..", etc.
+
     private Runnable loadingRunnable = new Runnable() {
         @Override
         public void run() {
@@ -143,9 +131,6 @@ public class ApiActivity extends AppCompatActivity {
         }
     };
 
-    // --------------------------------------------------------------------------------------
-    // Networking: fetchCoinGeckoBitcoin, fetchCoinPaprikaTop10, fetchCoinCapWorst3
-    // --------------------------------------------------------------------------------------
 
     private void fetchCoinGeckoBitcoin() {
         startLoadingAnimation();
@@ -176,7 +161,6 @@ public class ApiActivity extends AppCompatActivity {
                     JSONObject currentPrice = marketData.getJSONObject("current_price");
                     double priceUsd = currentPrice.getDouble("usd");
 
-                    // Keep using CoinPaprika's or CoinCap's CDN for the logo
                     String logoUrl = "https://assets.coincap.io/assets/icons/"
                             + symbol.toLowerCase() + "@2x.png";
 
@@ -192,7 +176,6 @@ public class ApiActivity extends AppCompatActivity {
         }).start();
     }
 
-    // Updated method name + logic
     private void fetchCoinPaprikaTop10() {
         startLoadingAnimation();
         coinList.clear();
@@ -212,7 +195,7 @@ public class ApiActivity extends AppCompatActivity {
 
                 try {
                     JSONArray arr = new JSONArray(response);
-                    // Grab the top 10 instead of 5
+
                     int limit = Math.min(arr.length(), 10);
                     for (int i = 0; i < limit; i++) {
                         JSONObject coinObj = arr.getJSONObject(i);
@@ -224,7 +207,6 @@ public class ApiActivity extends AppCompatActivity {
                         JSONObject usdObj = quotes.getJSONObject("USD");
                         double priceUsd = usdObj.getDouble("price");
 
-                        // Using CoinCap's icons:
                         String logoUrl = "https://assets.coincap.io/assets/icons/"
                                 + symbol.toLowerCase() + "@2x.png";
 
@@ -268,7 +250,7 @@ public class ApiActivity extends AppCompatActivity {
                         rawList.add(dataArr.getJSONObject(i));
                     }
 
-                    // Sort by volumeUsd24Hr ascending
+
                     Collections.sort(rawList, new Comparator<JSONObject>() {
                         @Override
                         public int compare(JSONObject o1, JSONObject o2) {
@@ -284,7 +266,7 @@ public class ApiActivity extends AppCompatActivity {
                         }
                     });
 
-                    // Take the first 3
+
                     int limit = Math.min(3, rawList.size());
                     for (int i = 0; i < limit; i++) {
                         JSONObject coinObj = rawList.get(i);
@@ -310,9 +292,6 @@ public class ApiActivity extends AppCompatActivity {
         }).start();
     }
 
-    // --------------------------------------------------------------------------------------
-    // Helper: doHttpGet (blocking IO, so must be called on background thread!)
-    // --------------------------------------------------------------------------------------
     private String doHttpGet(String urlString) {
         HttpURLConnection connection = null;
         BufferedReader reader = null;
@@ -351,9 +330,7 @@ public class ApiActivity extends AppCompatActivity {
         }
     }
 
-    // --------------------------------------------------------------------------------------
-    // Updating UI from background threads
-    // --------------------------------------------------------------------------------------
+
     private void updateRecycler() {
         runOnUiThread(new Runnable() {
             @Override
@@ -396,18 +373,15 @@ public class ApiActivity extends AppCompatActivity {
         });
     }
 
-    // --------------------------------------------------------------------------------------
-    // Handle orientation changes
-    // --------------------------------------------------------------------------------------
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        // Save coinList as a JSON string
         String json = convertCoinListToJson(coinList);
         outState.putString(KEY_COIN_LIST, json);
     }
 
-    // Convert coinList to JSON (including notes)
+
     private String convertCoinListToJson(ArrayList<CryptoCoin> list) {
         JSONArray arr = new JSONArray();
         for (CryptoCoin coin : list) {
@@ -418,7 +392,6 @@ public class ApiActivity extends AppCompatActivity {
                 obj.put("priceUsd", coin.getPriceUsd());
                 obj.put("logoUrl", coin.getLogoUrl());
 
-                // Store the notes (which may include timestamps)
                 JSONArray notesArr = new JSONArray();
                 for (String note : coin.getNotes()) {
                     notesArr.put(note);
@@ -433,7 +406,7 @@ public class ApiActivity extends AppCompatActivity {
         return arr.toString();
     }
 
-    // Convert JSON back to list (including notes)
+
     private ArrayList<CryptoCoin> parseCoinListFromJson(String json) {
         ArrayList<CryptoCoin> list = new ArrayList<>();
         try {
