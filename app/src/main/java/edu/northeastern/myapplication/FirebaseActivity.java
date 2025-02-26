@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FirebaseActivity extends AppCompatActivity {
-    private static final String TAG = "FrebaeActivity";
+    private static final String TAG = "FirebaseActivity";
 
     // UI
     private LinearLayout loginPanel, mainPanel, aboutPanel;
