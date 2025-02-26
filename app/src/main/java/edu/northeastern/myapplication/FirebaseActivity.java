@@ -78,11 +78,10 @@ public class FirebaseActivity extends AppCompatActivity {
     private HistoryAdapter historyAdapter;
     private DatabaseReference stickersRef;
 
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_firebase);
-//        getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit().clear().apply();
+//  getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit().clear().apply();
 
         // Initialize Firebase
         database = FirebaseDatabase.getInstance();
@@ -104,6 +103,15 @@ public class FirebaseActivity extends AppCompatActivity {
             loginLayout.setVisibility(View.VISIBLE);
             mainLayout.setVisibility(View.GONE);
         });
+
+        // Add About button click handler
+        Button btnAbout = findViewById(R.id.btnAbout);
+        if (btnAbout != null) {
+            btnAbout.setOnClickListener(v -> {
+                Intent intent = new Intent(FirebaseActivity.this, AboutActivity.class);
+                startActivity(intent);
+            });
+        }
 
         // Initialize sticker data
         initializeStickers();
@@ -137,6 +145,7 @@ public class FirebaseActivity extends AppCompatActivity {
             createNotificationChannel();
             requestNotificationPermission();
             listenForNewMessages();
+
         });
 
         // Check if user is already logged in
