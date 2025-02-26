@@ -1,8 +1,11 @@
 package edu.northeastern.myapplication;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -11,10 +14,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,6 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -68,14 +75,13 @@ public class FirebaseActivity extends AppCompatActivity {
 
     private List<StickerMessage> receivedMessages;
     private HistoryAdapter historyAdapter;
+    private DatabaseReference stickersRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_firebase);
         getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit().clear().apply();
-        createNotificationChannel();
-        requestNotificationPermission();
 
         // Initialize Firebase
         database = FirebaseDatabase.getInstance();
@@ -120,6 +126,9 @@ public class FirebaseActivity extends AppCompatActivity {
 
             // Show stickers by default
             setupStickerSelection();
+            createNotificationChannel();
+            requestNotificationPermission();
+            listenForNewMessages();
         });
 
         // Check if user is already logged in
@@ -135,6 +144,9 @@ public class FirebaseActivity extends AppCompatActivity {
 
             // Show stickers by default
             setupStickerSelection();
+            createNotificationChannel();
+            requestNotificationPermission();
+            listenForNewMessages();
         } else {
             loginLayout.setVisibility(View.VISIBLE);
             mainLayout.setVisibility(View.GONE);
@@ -358,4 +370,69 @@ public class FirebaseActivity extends AppCompatActivity {
             }
         }
     }
+
+    private void showNotification(String sender, String stickerId) {
+        // check authroity
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+        }
+
+        Intent intent = new Intent(this, FirebaseActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "STICKER_CHANNEL")
+                .setSmallIcon(R.drawable.notification)
+                .setContentTitle("New Sticker Received!")
+                .setContentText(sender + " sent you a sticker!")
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify(1, builder.build());
+    }
+
+    private void listenForNewMessages() {
+        messagesRef
+                .orderByChild("recipient")
+                .equalTo(currentUsername)
+                .addChildEventListener(new ChildEventListener() {
+
+                    @Override
+                    public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                        StickerMessage newMessage = snapshot.getValue(StickerMessage.class);
+                        if (newMessage != null) {
+                            String sender = newMessage.getSender();
+                            String stickerId = newMessage.getStickerId();
+//                            Log.d("FirebaseActivity", "New Sticker from " + sender + "，stickerId=" + stickerId);
+                            showNotification(sender, stickerId);
+                        }
+                    }
+
+                    @Override
+                    public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                    }
+
+                    @Override
+                    public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+                    }
+
+                    @Override
+                    public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                    }
+
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.e("FirebaseActivity", "error message: " + error.getMessage());
+                    }
+                });
+    }
 }
+
