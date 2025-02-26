@@ -42,11 +42,17 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+
+
 public class FirebaseActivity extends AppCompatActivity {
 
     // Constants
     private static final String PREFS_NAME = "StickerAppPrefs";
     private static final String KEY_USERNAME = "username";
+
+    private static final String CHANNEL_ID = "sticker_notifications";
+    private static final int NOTIFICATION_ID = 1;
+    private static final int PERMISSION_REQUEST_CODE = 123;
 
     // UI Components
     private EditText editTextUsername;
