@@ -230,6 +230,9 @@ public class FirebaseActivity extends AppCompatActivity {
             }
         }
     }
+
+
+
     private void setupStickerSelection() {
         // Reset selection
         selectedSticker = null;
