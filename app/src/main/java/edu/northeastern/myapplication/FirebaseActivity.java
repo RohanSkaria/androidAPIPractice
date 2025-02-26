@@ -81,7 +81,7 @@ public class FirebaseActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_firebase);
-        getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit().clear().apply();
+//        getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit().clear().apply();
 
         // Initialize Firebase
         database = FirebaseDatabase.getInstance();
