@@ -234,15 +234,18 @@ public class FirebaseActivity extends AppCompatActivity {
         // Reset selection
         selectedSticker = null;
 
+        // Determine span count based on orientation
+        int spanCount = getResources().getConfiguration().orientation ==
+                Configuration.ORIENTATION_LANDSCAPE ? 5 : 3;
+
         // Show stickers grid
         stickerAdapter = new StickerAdapter(availableStickers, this::onStickerSelected);
-        recyclerViewContent.setLayoutManager(new GridLayoutManager(this, 3));
+        recyclerViewContent.setLayoutManager(new GridLayoutManager(this, spanCount));
         recyclerViewContent.setAdapter(stickerAdapter);
 
         noDataTextView.setVisibility(View.GONE);
         recyclerViewContent.setVisibility(View.VISIBLE);
     }
-
     private void onStickerSelected(Sticker sticker) {
         // Save the selected sticker
         selectedSticker = sticker;
