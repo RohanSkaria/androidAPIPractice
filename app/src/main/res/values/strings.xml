@@ -9,4 +9,6 @@
     <string name="go_to_about">About</string>
     <string name="group_name">Group Name</string>
     <string name="team_members">Team Members</string>
+    <string name="sticker_image_desc">Sticker image</string>
+
 </resources>
