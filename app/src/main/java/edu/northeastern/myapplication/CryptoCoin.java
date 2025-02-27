@@ -7,8 +7,7 @@ public class CryptoCoin {
     private String name;
     private String symbol;
     private double priceUsd;
-    private String logoUrl; // URL to the coin's logo
-
+    private String logoUrl;
 
     private List<String> notes;
 

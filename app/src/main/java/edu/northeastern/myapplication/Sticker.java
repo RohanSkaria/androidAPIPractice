@@ -6,7 +6,7 @@ public class Sticker {
     private int resourceId;
 
     public Sticker() {
-        // Required empty constructor for Firebase
+
     }
 
     public Sticker(String id, String name, int resourceId) {

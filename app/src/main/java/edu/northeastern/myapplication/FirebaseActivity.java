@@ -47,7 +47,7 @@ import java.util.Map;
 
 public class FirebaseActivity extends AppCompatActivity {
 
-    // Constants
+
     private static final String PREFS_NAME = "StickerAppPrefs";
     private static final String KEY_USERNAME = "username";
 
@@ -55,7 +55,7 @@ public class FirebaseActivity extends AppCompatActivity {
     private static final int NOTIFICATION_ID = 1;
     private static final int PERMISSION_REQUEST_CODE = 123;
 
-    // UI Components
+
     private EditText editTextUsername;
     private Button btnLogin;
     private View loginLayout;
@@ -64,21 +64,21 @@ public class FirebaseActivity extends AppCompatActivity {
     private RecyclerView recyclerViewContent;
     private TextView noDataTextView;
 
-    // Firebase
+
     private FirebaseDatabase database;
     private DatabaseReference usersRef;
     private DatabaseReference messagesRef;
 
-    // Adapters
+
     private StickerAdapter stickerAdapter;
     private FriendAdapter friendAdapter;
 
-    // Data
+
     private String currentUsername;
     private List<Sticker> availableStickers;
     private List<String> availableFriends;
 
-    // Currently selected items
+
     private Sticker selectedSticker;
 
     private List<StickerMessage> receivedMessages;
@@ -88,14 +88,14 @@ public class FirebaseActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_firebase);
-//  getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit().clear().apply();
 
-        // Initialize Firebase
+
+
         database = FirebaseDatabase.getInstance();
         usersRef = database.getReference("users");
         messagesRef = database.getReference("messages");
 
-        // Initialize UI components
+
         editTextUsername = findViewById(R.id.editTextUsername);
         btnLogin = findViewById(R.id.btnLogin);
         loginLayout = findViewById(R.id.loginLayout);
@@ -111,7 +111,7 @@ public class FirebaseActivity extends AppCompatActivity {
             mainLayout.setVisibility(View.GONE);
         });
 
-        // Add About button click handler
+
         Button btnAbout = findViewById(R.id.btnAbout);
         if (btnAbout != null) {
             btnAbout.setOnClickListener(v -> {
@@ -120,10 +120,10 @@ public class FirebaseActivity extends AppCompatActivity {
             });
         }
 
-        // Initialize sticker data
+
         initializeStickers();
 
-        // Setup login button
+
         btnLogin.setOnClickListener(v -> {
             String username = editTextUsername.getText().toString().trim();
             if (username.isEmpty()) {
@@ -131,23 +131,22 @@ public class FirebaseActivity extends AppCompatActivity {
                 return;
             }
 
-            // Save username
             currentUsername = username;
             SharedPreferences.Editor editor = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
             editor.putString(KEY_USERNAME, currentUsername);
             editor.apply();
 
-            // Register user in Firebase
+
             registerUserInFirebase(username);
 
-            // Switch to main layout
+
             loginLayout.setVisibility(View.GONE);
             mainLayout.setVisibility(View.VISIBLE);
 
-            // Setup tabs
+
             setupTabLayout();
 
-            // Show stickers by default
+
             setupStickerSelection();
             createNotificationChannel();
             requestNotificationPermission();
@@ -155,7 +154,7 @@ public class FirebaseActivity extends AppCompatActivity {
 
         });
 
-        // Check if user is already logged in
+
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         String savedUsername = prefs.getString(KEY_USERNAME, null);
         if (savedUsername != null) {
@@ -163,10 +162,10 @@ public class FirebaseActivity extends AppCompatActivity {
             loginLayout.setVisibility(View.GONE);
             mainLayout.setVisibility(View.VISIBLE);
 
-            // Setup tabs
+
             setupTabLayout();
 
-            // Show stickers by default
+
             setupStickerSelection();
             createNotificationChannel();
             requestNotificationPermission();
@@ -180,7 +179,7 @@ public class FirebaseActivity extends AppCompatActivity {
     private void initializeStickers() {
         availableStickers = new ArrayList<>();
 
-        // Add your stickers here (you should add drawables to your project)
+
         availableStickers.add(new Sticker("sticker_1", "Happy Face", R.drawable.sticker_happy));
         availableStickers.add(new Sticker("sticker_2", "Sad Face", R.drawable.sticker_sad));
         availableStickers.add(new Sticker("sticker_3", "Thumbs Up", R.drawable.sticker_thumbs_up));
@@ -207,7 +206,7 @@ public class FirebaseActivity extends AppCompatActivity {
                 } else if (position == 1) {
                     setupHistoryView();
                 } else if (position == 2) {
-                    // We'll implement stats view later
+
                     noDataTextView.setText("Stats view not implemented yet");
                     noDataTextView.setVisibility(View.VISIBLE);
                     recyclerViewContent.setVisibility(View.GONE);
@@ -216,12 +215,12 @@ public class FirebaseActivity extends AppCompatActivity {
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
-                // Not needed
+
             }
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
-                // Not needed
+
             }
         });
     }
@@ -230,18 +229,16 @@ public class FirebaseActivity extends AppCompatActivity {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        // No need to reload the entire activity
-        // Just adjust layouts if needed
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            // Apply landscape-specific adjustments
+
             if (recyclerViewContent != null && recyclerViewContent.getLayoutManager() instanceof GridLayoutManager) {
-                // For sticker grid, increase the span count in landscape mode
+
                 ((GridLayoutManager) recyclerViewContent.getLayoutManager()).setSpanCount(5);
             }
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            // Reset to portrait-specific adjustments
+
             if (recyclerViewContent != null && recyclerViewContent.getLayoutManager() instanceof GridLayoutManager) {
-                // For sticker grid, use default span count in portrait
+
                 ((GridLayoutManager) recyclerViewContent.getLayoutManager()).setSpanCount(3);
             }
         }
@@ -250,14 +247,14 @@ public class FirebaseActivity extends AppCompatActivity {
 
 
     private void setupStickerSelection() {
-        // Reset selection
+
         selectedSticker = null;
 
-        // Determine span count based on orientation
+
         int spanCount = getResources().getConfiguration().orientation ==
                 Configuration.ORIENTATION_LANDSCAPE ? 5 : 3;
 
-        // Show stickers grid
+
         stickerAdapter = new StickerAdapter(availableStickers, this::onStickerSelected);
         recyclerViewContent.setLayoutManager(new GridLayoutManager(this, spanCount));
         recyclerViewContent.setAdapter(stickerAdapter);
@@ -267,10 +264,10 @@ public class FirebaseActivity extends AppCompatActivity {
     }
 
     private void onStickerSelected(Sticker sticker) {
-        // Save the selected sticker
+
         selectedSticker = sticker;
 
-        // Now show friends for selection
+
         loadFriends();
     }
 
@@ -295,7 +292,7 @@ public class FirebaseActivity extends AppCompatActivity {
                     noDataTextView.setVisibility(View.GONE);
                     recyclerViewContent.setVisibility(View.VISIBLE);
 
-                    // Show friends list
+
                     friendAdapter = new FriendAdapter(availableFriends, FirebaseActivity.this::onFriendSelected);
                     recyclerViewContent.setLayoutManager(new LinearLayoutManager(FirebaseActivity.this));
                     recyclerViewContent.setAdapter(friendAdapter);
@@ -310,14 +307,13 @@ public class FirebaseActivity extends AppCompatActivity {
     }
 
     private void onFriendSelected(String friend) {
-        // Send the sticker
+
         if (selectedSticker != null) {
             sendSticker(selectedSticker, friend);
         }
     }
 
     private void sendSticker(Sticker sticker, String recipient) {
-        // Create message object
         StickerMessage message = new StickerMessage(
                 currentUsername,
                 recipient,
@@ -325,17 +321,17 @@ public class FirebaseActivity extends AppCompatActivity {
                 System.currentTimeMillis()
         );
 
-        // Push to database
+
         String messageId = messagesRef.push().getKey();
         if (messageId != null) {
             messagesRef.child(messageId).setValue(message)
                     .addOnSuccessListener(aVoid -> {
                         Toast.makeText(FirebaseActivity.this, "Sticker sent to " + recipient, Toast.LENGTH_SHORT).show();
 
-                        // Also update sent count (we'll implement this later)
+
                         updateSentStickerCount(sticker.getId());
 
-                        // Go back to sticker selection
+
                         setupStickerSelection();
                     })
                     .addOnFailureListener(e -> {
@@ -345,8 +341,7 @@ public class FirebaseActivity extends AppCompatActivity {
     }
 
     private void updateSentStickerCount(String stickerId) {
-        // We'll implement this in the next part
-        // This will track how many of each sticker a user has sent
+
     }
 
     private void setupHistoryView() {
@@ -367,7 +362,7 @@ public class FirebaseActivity extends AppCompatActivity {
                             }
                         }
 
-                        //timestamping
+
                         Collections.sort(receivedMessages, (m1, m2) ->
                                 Long.compare(m2.getTimestamp(), m1.getTimestamp()));
 
@@ -400,15 +395,14 @@ public class FirebaseActivity extends AppCompatActivity {
     }
 
     private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = "Sticker Notifications";
             String description = "Channel for sticker app notifications";
             int importance = NotificationManager.IMPORTANCE_HIGH;
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
             channel.setDescription(description);
-            // Register the channel with the system
+
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
@@ -428,10 +422,10 @@ public class FirebaseActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted
+
                 Toast.makeText(this, "Notification permission granted", Toast.LENGTH_SHORT).show();
             } else {
-                // Permission denied
+
                 Toast.makeText(this, "Notifications disabled. You won't be notified of new stickers.",
                         Toast.LENGTH_LONG).show();
             }
@@ -440,7 +434,7 @@ public class FirebaseActivity extends AppCompatActivity {
 
 
     private void showNotification(String sender, String stickerId) {
-        // check authroity
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 return;
@@ -464,8 +458,8 @@ public class FirebaseActivity extends AppCompatActivity {
     }
 
     private void showStickerNotification(StickerMessage message) {
-        // Get sticker resource
-        int stickerResId = R.drawable.sticker_unknown; // Default if not found
+
+        int stickerResId = R.drawable.sticker_unknown;
         for (Sticker sticker : availableStickers) {
             if (sticker.getId().equals(message.getStickerId())) {
                 stickerResId = sticker.getResourceId();
@@ -473,15 +467,15 @@ public class FirebaseActivity extends AppCompatActivity {
             }
         }
 
-        // Create an explicit intent for the activity
+
         Intent intent = new Intent(this, FirebaseActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
                 PendingIntent.FLAG_IMMUTABLE);
 
-        // Build the notification
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_notification)  // Make sure to create this icon
+                .setSmallIcon(R.drawable.ic_notification)
                 .setLargeIcon(BitmapFactory.decodeResource(getResources(), stickerResId))
                 .setContentTitle("New Sticker Received!")
                 .setContentText("You received a sticker from " + message.getSender())
@@ -489,7 +483,7 @@ public class FirebaseActivity extends AppCompatActivity {
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true);
 
-        // Show the notification
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
                 PackageManager.PERMISSION_GRANTED || Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
@@ -503,7 +497,7 @@ public class FirebaseActivity extends AppCompatActivity {
                     public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                         StickerMessage message = snapshot.getValue(StickerMessage.class);
                         if (message != null) {
-                            // Check if this is a new message (within the last minute)
+
                             long currentTime = System.currentTimeMillis();
                             if (currentTime - message.getTimestamp() < 60000) {
                                 showStickerNotification(message);

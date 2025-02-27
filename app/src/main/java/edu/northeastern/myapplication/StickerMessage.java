@@ -7,7 +7,7 @@ public class StickerMessage {
     private long timestamp;
 
     public StickerMessage() {
-        // Required empty constructor for Firebase
+
     }
 
     public StickerMessage(String sender, String recipient, String stickerId, long timestamp) {

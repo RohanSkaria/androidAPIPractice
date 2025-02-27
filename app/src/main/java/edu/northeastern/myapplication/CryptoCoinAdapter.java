@@ -89,7 +89,7 @@ public class CryptoCoinAdapter extends RecyclerView.Adapter<CryptoCoinAdapter.Co
             itemParams.topMargin = dpToPx(holder.itemView.getContext(), SMALL_MARGIN);
             itemParams.bottomMargin = dpToPx(holder.itemView.getContext(), SMALL_MARGIN);
             holder.itemView.setLayoutParams(itemParams);
-        } else {    // can't remove for each viewholder will be reused
+        } else {
             holder.tvName.setTextSize(TypedValue.COMPLEX_UNIT_SP, TEXT_SIZE_TITLE_BIG_SP);
             holder.tvSymbol.setTextSize(TypedValue.COMPLEX_UNIT_SP, TEXT_SIZE_SUBTITLE_BIG_SP);
             holder.tvPrice.setTextSize(TypedValue.COMPLEX_UNIT_SP, TEXT_SIZE_SUBTITLE_BIG_SP);
@@ -158,7 +158,7 @@ public class CryptoCoinAdapter extends RecyclerView.Adapter<CryptoCoinAdapter.Co
         }
 
         public void bind(CryptoCoin coin) {
-            // Basic coin data
+
             tvName.setText(coin.getName());
             tvSymbol.setText("Symbol: " + coin.getSymbol());
             tvPrice.setText(String.format("Price: $%.2f", coin.getPriceUsd()));
@@ -197,7 +197,7 @@ public class CryptoCoinAdapter extends RecyclerView.Adapter<CryptoCoinAdapter.Co
             });
         }
 
-        // Helper method for current time
+
         private String getCurrentTimeString() {
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
             return sdf.format(new Date());

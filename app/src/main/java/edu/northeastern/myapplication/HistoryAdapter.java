@@ -42,20 +42,20 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryV
     public void onBindViewHolder(@NonNull HistoryViewHolder holder, int position) {
         StickerMessage message = messages.get(position);
 
-        // Set sender name
+
         holder.textViewSender.setText("From: " + message.getSender());
 
-        // Set timestamp
+
         String formattedDate = dateFormat.format(new Date(message.getTimestamp()));
         holder.textViewTimestamp.setText(formattedDate);
 
-        // Set sticker image
+
         Integer resourceId = stickerResources.get(message.getStickerId());
         if (resourceId != null) {
             holder.imageViewHistorySticker.setImageResource(resourceId);
             holder.textViewUnknownSticker.setVisibility(View.GONE);
         } else {
-            // Unknown sticker ID
+
             holder.imageViewHistorySticker.setImageResource(R.drawable.sticker_unknown);
             holder.textViewUnknownSticker.setVisibility(View.VISIBLE);
         }

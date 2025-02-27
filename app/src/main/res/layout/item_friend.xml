@@ -14,11 +14,6 @@
         android:orientation="horizontal"
         android:padding="16dp">
 
-<!--        <ImageView-->
-<!--            android:layout_width="36dp"-->
-<!--            android:layout_height="36dp"-->
-<!--&lt;!&ndash;            android:src="@drawable/ic_person" &ndash;&gt;-->
-<!--        />-->
 
         <TextView
             android:id="@+id/textViewFriendName"

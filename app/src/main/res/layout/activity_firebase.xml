@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".FirebaseActivity">
 
-    <!-- Login Layout -->
+
     <LinearLayout
         android:id="@+id/loginLayout"
         android:layout_width="match_parent"
@@ -42,7 +42,7 @@
             android:text="Login" />
     </LinearLayout>
 
-    <!-- Main Content Layout (initially hidden) -->
+
     <LinearLayout
         android:id="@+id/mainLayout"
         android:layout_width="match_parent"
@@ -50,7 +50,7 @@
         android:orientation="vertical"
         android:visibility="gone">
 
-        <!-- Group Name TextView (added) -->
+
         <TextView
             android:id="@+id/textViewGroupName"
             android:layout_width="match_parent"
@@ -98,7 +98,7 @@
                 android:layout_gravity="bottom|end"
                 android:layout_margin="16dp" />
 
-            <!-- About Button (added) -->
+
             <Button
                 android:id="@+id/btnAbout"
                 android:layout_width="wrap_content"

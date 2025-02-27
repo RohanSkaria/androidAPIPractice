@@ -12,11 +12,11 @@ public class AboutActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
 
-        // Set group name
+
         TextView groupNameTextView = findViewById(R.id.group_name);
         groupNameTextView.setText("Group Name: Group 10");
 
-        // Set team members
+
         TextView membersTextView = findViewById(R.id.team_members);
         String members = "Team Members:\n" +
                 "Madisen Patrick\n" +

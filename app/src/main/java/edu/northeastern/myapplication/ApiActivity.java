@@ -125,7 +125,7 @@ public class ApiActivity extends AppCompatActivity {
             }
             tvLoading.setText(sb.toString());
 
-            loadingDotCount = (loadingDotCount + 1) % 4; // cycle 0..3
+            loadingDotCount = (loadingDotCount + 1) % 4;
 
             loadingHandler.postDelayed(this, 500);
         }
@@ -181,7 +181,7 @@ public class ApiActivity extends AppCompatActivity {
         coinList.clear();
         adapter.notifyDataSetChanged();
 
-        final String url = "https://api.coinpaprika.com/v1/tickers"; // returns many coins
+        final String url = "https://api.coinpaprika.com/v1/tickers";
 
         new Thread(new Runnable() {
             @Override
@@ -348,8 +348,7 @@ public class ApiActivity extends AppCompatActivity {
         ConstraintSet constraintSet = new ConstraintSet();
         constraintSet.clone(constraintLayout);
         if (coinList.size() >= COIN_COUNT_THRESHOLD) {
-//            int fixedHeightPx = (int) (RECYCLER_FIXED_HEIGHT_DP * getResources().getDisplayMetrics().density);
-//            constraintSet.constrainHeight(R.id.recyclerViewCoins, fixedHeightPx);
+
             constraintSet.constrainHeight(R.id.recyclerViewCoins, ConstraintSet.MATCH_CONSTRAINT);
         }
         constraintSet.applyTo(constraintLayout);

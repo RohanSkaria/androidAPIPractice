@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log; // <-- Import the Android Log class
+import android.util.Log;
 import android.widget.ImageView;
 
 import java.io.InputStream;
@@ -48,11 +48,11 @@ public class ImageLoader {
                         inputStream = connection.getInputStream();
                         final Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
 
-                        // Cache it
+
                         bitmapCache.put(imageUrl, bitmap);
                         Log.d(TAG, "Bitmap downloaded & cached for: " + imageUrl);
 
-                        // Update ImageView on main thread
+
                         new Handler(Looper.getMainLooper()).post(new Runnable() {
                             @Override
                             public void run() {
