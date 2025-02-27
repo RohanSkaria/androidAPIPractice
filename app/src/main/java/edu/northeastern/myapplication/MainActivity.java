@@ -22,10 +22,14 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+
+
+
         btnFirebase.setOnClickListener(view -> {
             Intent intent = new Intent(this, FirebaseActivity.class);
             startActivity(intent);
         });
+
 
         btnAbout.setOnClickListener(v -> {
             Intent intent = new Intent(this, AboutActivity.class);
