@@ -422,6 +422,20 @@ public class FirebaseActivity extends AppCompatActivity {
             }
         }
     }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted
+                Toast.makeText(this, "Notification permission granted", Toast.LENGTH_SHORT).show();
+            } else {
+                // Permission denied
+                Toast.makeText(this, "Notifications disabled. You won't be notified of new stickers.",
+                        Toast.LENGTH_LONG).show();
+            }
+        }
+    }
 
 
     private void showNotification(String sender, String stickerId) {
