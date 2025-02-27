@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -462,44 +463,65 @@ public class FirebaseActivity extends AppCompatActivity {
         notificationManager.notify(1, builder.build());
     }
 
+    private void showStickerNotification(StickerMessage message) {
+        // Get sticker resource
+        int stickerResId = R.drawable.sticker_unknown; // Default if not found
+        for (Sticker sticker : availableStickers) {
+            if (sticker.getId().equals(message.getStickerId())) {
+                stickerResId = sticker.getResourceId();
+                break;
+            }
+        }
+
+        // Create an explicit intent for the activity
+        Intent intent = new Intent(this, FirebaseActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
+                PendingIntent.FLAG_IMMUTABLE);
+
+        // Build the notification
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_notification)  // Make sure to create this icon
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(), stickerResId))
+                .setContentTitle("New Sticker Received!")
+                .setContentText("You received a sticker from " + message.getSender())
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true);
+
+        // Show the notification
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+                PackageManager.PERMISSION_GRANTED || Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+            notificationManager.notify(NOTIFICATION_ID, builder.build());
+        }
+    }
     private void listenForNewMessages() {
-        long notifyThreshold = System.currentTimeMillis();
-        messagesRef
-                .orderByChild("recipient")
-                .equalTo(currentUsername)
+        messagesRef.orderByChild("recipient").equalTo(currentUsername)
                 .addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                        StickerMessage newMessage = snapshot.getValue(StickerMessage.class);
-                        if (newMessage != null) {
-                            if (newMessage.getTimestamp() > notifyThreshold) {
-                                String sender = newMessage.getSender();
-                                String stickerId = newMessage.getStickerId();
-                                showNotification(sender, stickerId);
+                        StickerMessage message = snapshot.getValue(StickerMessage.class);
+                        if (message != null) {
+                            // Check if this is a new message (within the last minute)
+                            long currentTime = System.currentTimeMillis();
+                            if (currentTime - message.getTimestamp() < 60000) {
+                                showStickerNotification(message);
                             }
                         }
                     }
 
                     @Override
-                    public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-                    }
+                    public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {}
 
                     @Override
-                    public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-                    }
+                    public void onChildRemoved(@NonNull DataSnapshot snapshot) {}
 
                     @Override
-                    public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-                    }
-
+                    public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {}
 
                     @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Log.e("FirebaseActivity", "error message: " + error.getMessage());
-                    }
+                    public void onCancelled(@NonNull DatabaseError error) {}
                 });
     }
 }
