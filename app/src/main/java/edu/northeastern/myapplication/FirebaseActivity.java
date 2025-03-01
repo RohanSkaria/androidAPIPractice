@@ -1,9 +1,9 @@
 package edu.northeastern.myapplication;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
@@ -155,6 +155,18 @@ public class FirebaseActivity extends AppCompatActivity {
             loginLayout.setVisibility(View.VISIBLE);
             mainLayout.setVisibility(View.GONE);
         }
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (recyclerViewContent.getAdapter() instanceof FriendAdapter) {
+                    setupStickerSelection();
+                } else {
+                    setEnabled(false);
+                    FirebaseActivity.this.onBackPressed();
+                }
+            }
+        });
     }
 
     private void initializeStickers() {
