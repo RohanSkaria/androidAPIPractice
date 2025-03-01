@@ -77,6 +77,7 @@ public class FirebaseActivity extends AppCompatActivity {
     private List<StickerMessage> receivedMessages;
     private HistoryAdapter historyAdapter;
     private DatabaseReference stickersRef;
+    private ChildEventListener newMessagesListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -523,7 +524,10 @@ public class FirebaseActivity extends AppCompatActivity {
     }
 
     private void listenForNewMessages() {
-        messagesRef.orderByChild("recipient").equalTo(currentUsername)
+        if (newMessagesListener != null) {
+            messagesRef.removeEventListener(newMessagesListener);
+        }
+        newMessagesListener = messagesRef.orderByChild("recipient").equalTo(currentUsername)
                 .addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
