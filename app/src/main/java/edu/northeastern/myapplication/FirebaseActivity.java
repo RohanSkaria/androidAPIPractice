@@ -1,9 +1,9 @@
 package edu.northeastern.myapplication;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
@@ -77,7 +77,6 @@ public class FirebaseActivity extends AppCompatActivity {
     private List<StickerMessage> receivedMessages;
     private HistoryAdapter historyAdapter;
     private DatabaseReference stickersRef;
-    private ChildEventListener newMessagesListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,29 +155,16 @@ public class FirebaseActivity extends AppCompatActivity {
             loginLayout.setVisibility(View.VISIBLE);
             mainLayout.setVisibility(View.GONE);
         }
-
-        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                if (recyclerViewContent.getAdapter() instanceof FriendAdapter) {
-                    setupStickerSelection();
-                } else {
-                    setEnabled(false);
-                    FirebaseActivity.this.onBackPressed();
-                }
-            }
-        });
     }
 
     private void initializeStickers() {
         availableStickers = new ArrayList<>();
 
-        availableStickers.add(new Sticker("sticker_1", "Happy Face", R.drawable.sticker_happy_face));
-        availableStickers.add(new Sticker("sticker_2", "Sad Face", R.drawable.sticker_sad_face));
-        availableStickers.add(new Sticker("sticker_3", "Thumbs Up", R.drawable.sticker_thumb));
+        availableStickers.add(new Sticker("sticker_1", "Happy Face", R.drawable.sticker_happy));
+        availableStickers.add(new Sticker("sticker_2", "Sad Face", R.drawable.sticker_sad));
+        availableStickers.add(new Sticker("sticker_3", "Thumbs Up", R.drawable.sticker_thumbs_up));
         availableStickers.add(new Sticker("sticker_4", "Heart", R.drawable.sticker_heart));
         availableStickers.add(new Sticker("sticker_5", "Party", R.drawable.sticker_party));
-        availableStickers.add(new Sticker("sticker_6", "Star", R.drawable.sticker_star));
     }
 
     private void registerUserInFirebase(String username) {
@@ -525,10 +511,7 @@ public class FirebaseActivity extends AppCompatActivity {
     }
 
     private void listenForNewMessages() {
-        if (newMessagesListener != null) {
-            messagesRef.removeEventListener(newMessagesListener);
-        }
-        newMessagesListener = messagesRef.orderByChild("recipient").equalTo(currentUsername)
+        messagesRef.orderByChild("recipient").equalTo(currentUsername)
                 .addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {

@@ -15,8 +15,12 @@ import java.util.Map;
 
 public class StatsAdapter extends RecyclerView.Adapter<StatsAdapter.StatsViewHolder> {
 
+    // This map is { stickerId -> numberOfTimesSentByUser }
     private final Map<String, Long> statsMap;
+    // A list of all known sticker objects (id, name, resource)
     private final List<Sticker> availableStickers;
+
+    // We'll iterate over the keys of statsMap to populate items
     private final List<String> stickerIds;
 
     public StatsAdapter(Map<String, Long> statsMap, List<Sticker> availableStickers) {
@@ -38,11 +42,11 @@ public class StatsAdapter extends RecyclerView.Adapter<StatsAdapter.StatsViewHol
         String stickerId = stickerIds.get(position);
         Long count = statsMap.get(stickerId);
 
-        // Default to unknown in case we can’t match it
+        // Default to unknown if we can't find a match
         int resId = R.drawable.sticker_unknown;
         String stickerName = "Unknown Sticker";
 
-        // Find the resource ID & name from the known sticker list
+        // See if we can match a known sticker
         for (Sticker s : availableStickers) {
             if (s.getId().equals(stickerId)) {
                 resId = s.getResourceId();
@@ -74,6 +78,7 @@ public class StatsAdapter extends RecyclerView.Adapter<StatsAdapter.StatsViewHol
         void bind(String stickerName, int stickerResId, Long count) {
             imageView.setImageResource(stickerResId);
             nameView.setText(stickerName);
+            // e.g. "Sent 5 times"
             countView.setText("Sent " + count + " times");
         }
     }
