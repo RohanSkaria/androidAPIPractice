@@ -188,7 +188,6 @@ public class FirebaseActivity extends AppCompatActivity {
         // This merges the data instead of overwriting the entire node.
     }
 
-
     private void setupTabLayout() {
         tabLayout.removeAllTabs();
         tabLayout.addTab(tabLayout.newTab().setText("Send Sticker"));
