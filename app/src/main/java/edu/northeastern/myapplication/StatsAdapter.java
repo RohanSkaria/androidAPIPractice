@@ -1,5 +1,6 @@
 package edu.northeastern.myapplication;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,6 +57,7 @@ public class StatsAdapter extends RecyclerView.Adapter<StatsAdapter.StatsViewHol
         }
 
         holder.bind(stickerName, resId, count);
+
     }
 
     @Override
@@ -75,11 +77,16 @@ public class StatsAdapter extends RecyclerView.Adapter<StatsAdapter.StatsViewHol
             countView = itemView.findViewById(R.id.stickerCount);
         }
 
+        @SuppressLint("SetTextI18n")
         void bind(String stickerName, int stickerResId, Long count) {
             imageView.setImageResource(stickerResId);
             nameView.setText(stickerName);
             // e.g. "Sent 5 times"
-            countView.setText("Sent " + count + " times");
+            if(count == 1){
+                countView.setText("Sent " + count + " time");
+            } else {
+                countView.setText("Sent " + count + " times");
+            }
         }
     }
 }
