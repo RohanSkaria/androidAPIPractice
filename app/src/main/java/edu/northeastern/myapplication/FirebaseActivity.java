@@ -182,8 +182,12 @@ public class FirebaseActivity extends AppCompatActivity {
     }
 
     private void registerUserInFirebase(String username) {
-        usersRef.child(username).setValue(true);
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("exists", true);
+        usersRef.child(username).updateChildren(updates);
+        // This merges the data instead of overwriting the entire node.
     }
+
 
     private void setupTabLayout() {
         tabLayout.removeAllTabs();
