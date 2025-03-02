@@ -61,14 +61,11 @@ public class FirebaseActivity extends AppCompatActivity {
     private TabLayout tabLayout;
     private RecyclerView recyclerViewContent;
     private TextView noDataTextView;
-
     private FirebaseDatabase database;
     private DatabaseReference usersRef;
     private DatabaseReference messagesRef;
-
     private StickerAdapter stickerAdapter;
     private FriendAdapter friendAdapter;
-
     private String currentUsername;
     private List<Sticker> availableStickers;
     private List<String> availableFriends;
@@ -179,6 +176,7 @@ public class FirebaseActivity extends AppCompatActivity {
         availableStickers.add(new Sticker("sticker_3", "Thumbs Up", R.drawable.sticker_thumb));
         availableStickers.add(new Sticker("sticker_4", "Heart", R.drawable.sticker_heart));
         availableStickers.add(new Sticker("sticker_6", "Star", R.drawable.sticker_star));
+        availableStickers.add(new Sticker("sticker_5", "Party", R.drawable.sticker_party));
     }
 
     private void registerUserInFirebase(String username) {
