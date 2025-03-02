@@ -174,11 +174,11 @@ public class FirebaseActivity extends AppCompatActivity {
     private void initializeStickers() {
         availableStickers = new ArrayList<>();
 
-        availableStickers.add(new Sticker("sticker_1", "Happy Face", R.drawable.sticker_happy));
-        availableStickers.add(new Sticker("sticker_2", "Sad Face", R.drawable.sticker_sad));
-        availableStickers.add(new Sticker("sticker_3", "Thumbs Up", R.drawable.sticker_thumbs_up));
+        availableStickers.add(new Sticker("sticker_1", "Happy Face", R.drawable.sticker_happy_face));
+        availableStickers.add(new Sticker("sticker_2", "Sad Face", R.drawable.sticker_sad_face));
+        availableStickers.add(new Sticker("sticker_3", "Thumbs Up", R.drawable.sticker_thumb));
         availableStickers.add(new Sticker("sticker_4", "Heart", R.drawable.sticker_heart));
-        availableStickers.add(new Sticker("sticker_5", "Party", R.drawable.sticker_party));
+        availableStickers.add(new Sticker("sticker_6", "Star", R.drawable.sticker_star));
     }
 
     private void registerUserInFirebase(String username) {
