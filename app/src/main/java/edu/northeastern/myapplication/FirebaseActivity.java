@@ -36,7 +36,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-// NOTE: For counting, we use ValueEventListener below
+
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -183,7 +183,7 @@ public class FirebaseActivity extends AppCompatActivity {
         Map<String, Object> updates = new HashMap<>();
         updates.put("exists", true);
         usersRef.child(username).updateChildren(updates);
-        // This merges the data instead of overwriting the entire node.
+
     }
 
     private void setupTabLayout() {
@@ -201,8 +201,7 @@ public class FirebaseActivity extends AppCompatActivity {
                 } else if (position == 1) {
                     setupHistoryView();
                 } else if (position == 2) {
-                    // REPLACED: Instead of "Stats view not implemented yet",
-                    // we call a method that loads user stats from Firebase.
+
                     setupStatsView();
                 }
             }
@@ -305,7 +304,7 @@ public class FirebaseActivity extends AppCompatActivity {
                         Toast.makeText(FirebaseActivity.this, "Sticker sent to " + recipient,
                                 Toast.LENGTH_SHORT).show();
 
-                        // Call the method to increment the "sent sticker" count
+
                         updateSentStickerCount(sticker.getId());
 
                         setupStickerSelection();
@@ -317,9 +316,9 @@ public class FirebaseActivity extends AppCompatActivity {
         }
     }
 
-    // ADDED: This method increments the count of how many times the user has sent a particular sticker.
+
     private void updateSentStickerCount(String stickerId) {
-        // We'll store counts under "users/{username}/stickerCounts/{stickerId}"
+
         DatabaseReference stickerCountRef = usersRef
                 .child(currentUsername)
                 .child("stickerCounts")
@@ -335,13 +334,13 @@ public class FirebaseActivity extends AppCompatActivity {
                         currentCount = val;
                     }
                 }
-                // Increment and save
+
                 stickerCountRef.setValue(currentCount + 1);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                // Handle error if needed
+
             }
         });
     }
@@ -364,7 +363,7 @@ public class FirebaseActivity extends AppCompatActivity {
                             }
                         }
 
-                        // Sort by timestamp descending
+
                         Collections.sort(receivedMessages, (m1, m2) ->
                                 Long.compare(m2.getTimestamp(), m1.getTimestamp()));
 
@@ -395,7 +394,7 @@ public class FirebaseActivity extends AppCompatActivity {
                 });
     }
 
-    // ADDED: Loads the user's sticker-sent counts and displays in a RecyclerView
+
     private void setupStatsView() {
         DatabaseReference stickerCountsRef = usersRef
                 .child(currentUsername)
@@ -421,7 +420,7 @@ public class FirebaseActivity extends AppCompatActivity {
                     noDataTextView.setVisibility(View.GONE);
                     recyclerViewContent.setVisibility(View.VISIBLE);
 
-                    // Use the StatsAdapter (defined in a separate file)
+
                     StatsAdapter statsAdapter = new StatsAdapter(statsMap, availableStickers);
                     recyclerViewContent.setLayoutManager(new LinearLayoutManager(FirebaseActivity.this));
                     recyclerViewContent.setAdapter(statsAdapter);
@@ -533,7 +532,7 @@ public class FirebaseActivity extends AppCompatActivity {
                         StickerMessage message = snapshot.getValue(StickerMessage.class);
                         if (message != null) {
                             long currentTime = System.currentTimeMillis();
-                            // Only notify if the message is recent (e.g., within the last 60s)
+
                             if (currentTime - message.getTimestamp() < 60000) {
                                 showStickerNotification(message);
                             }
