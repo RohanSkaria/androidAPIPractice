@@ -10,5 +10,6 @@
     <string name="group_name">Group Name</string>
     <string name="team_members">Team Members</string>
     <string name="sticker_image_desc">Sticker image</string>
+    <string name="sticker_name">Sticker Name</string>
 
 </resources>
